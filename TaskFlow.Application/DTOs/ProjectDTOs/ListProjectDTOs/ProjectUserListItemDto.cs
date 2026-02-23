@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,11 @@ namespace TaskFlow.Application.DTOs.ProjectDTOs.ListProjectDTOs
     public class ProjectUserListItemDto
     {
         public int UserId { get; set; }
+        [Required]
+        [StringLength(100)]
         public string UserName { get; set; } = null!;
+        [Required]
+        [EmailAddress]
         public string Email { get; set; } = null!;
         public ProjectRole ProjectRole { get; set; }
     }
