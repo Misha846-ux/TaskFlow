@@ -13,7 +13,7 @@ namespace TaskFlow.Domain.Entities
         public int ProjectId { get; set; }
         public int UserId { get; set; }
         public ProjectRole ProjectRole { get; set; }
-        public virtual ProjectEntity Project { get; set; } = null!;
-        public virtual UserEntity User { get; set; } = null!;
+        public ProjectEntity Project { get; set; }
+        public UserEntity User { get; set; }
     }
 }

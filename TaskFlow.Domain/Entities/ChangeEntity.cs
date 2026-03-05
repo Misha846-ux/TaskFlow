@@ -13,6 +13,6 @@ namespace TaskFlow.Domain.Entities
         public ChangeTableType Table { get; set; }
         public int NoteId { get; set; }
         public int UserId { get; set; }
-        public virtual UserEntity User { get; set; } = null!;
+        public UserEntity User { get; set; }
     }
 }

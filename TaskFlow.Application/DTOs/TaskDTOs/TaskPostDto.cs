@@ -9,9 +9,9 @@ namespace TaskFlow.Application.DTOs.TaskDto;
 
 public class TaskPostDto
 {
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public TaskPriority Priority { get; set; }
-    public DateTime DueDate { get; set; }
+    public string TaskName { get; set; }
+    public string Description { get; set; }
+    public int Priority { get; set; }
+    public DateTime DeadLine { get; set; }
     public int ProjectId { get; set; }
 }

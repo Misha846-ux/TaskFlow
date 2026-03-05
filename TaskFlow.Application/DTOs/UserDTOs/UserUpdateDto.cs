@@ -9,12 +9,13 @@ namespace TaskFlow.Application.DTOs.UserDTOs
 {
     public class UserUpdateDto
     {
-        public string UserName { get; set; }
-        [Required]
+        public int Id { get; set; }
+        public string? UserName { get; set; } = null;
         [EmailAddress]
-        public string Email { get; set; }
-        [Required]
-        public string Password { get; set; }
-        public string PassTolcon { get; set; }
+        public string? Email { get; set; } = null;
+        public int? GlobaleRole { get; set; } = null;
+        public string? Password { get; set; } = null;
+        public string? PassTolcon { get; set; } = null;
+        public string? Settings { get; set; } = null;
     }
 }

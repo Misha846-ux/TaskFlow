@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,10 +11,12 @@ namespace TaskFlow.Application.DTOs.UserDTOs
     {
         public int Id { get; set; }
         public string UserName { get; set; }
+        [EmailAddress]
         public string Email { get; set; }
         public string GlobalRole { get; set; }
         public string PassTolcon {  get; set; }
-        public string GreatedAt { get; set; }
-        public byte[] CompaniesId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public ICollection<int> CompaniesId { get; set; }
+        public string Settings {  get; set; }
     }
 }

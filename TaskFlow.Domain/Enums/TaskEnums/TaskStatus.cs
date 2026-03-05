@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TaskFlow.Domain.Enums.TaskEnums;
 
-internal enum TaskStatus
+public enum TaskStatus
 {
     Waiting = 0,
     InProgress = 1,

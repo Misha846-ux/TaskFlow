@@ -9,12 +9,10 @@ namespace TaskFlow.Domain.Entities
     public class ProjectEntity
     {
         public int Id { get; set; }
-        public string Title { get; set; } = null!;
+        public string Title { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public int CompanyId { get; set; }
-        public int Workers { get; set; }
-        public virtual CompanyEntity Company { get; set; } = null!;
-        public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
-        public virtual ICollection<ProjectUserEntity> ProjectUsers { get; set; } = new List<ProjectUserEntity>();
+        public CompanyEntity Company { get; set; }
+        public ICollection<ProjectUserEntity> Users { get; set; }
     }
 }
