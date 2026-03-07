@@ -5,7 +5,6 @@ namespace TaskFlow.Api.Controllers;
 
 [ApiController]
 [Route("/[controller]")]
-[Authorize(Roles = "Admin")]
 public class CompanyController : ControllerBase
 {
     [HttpGet]
