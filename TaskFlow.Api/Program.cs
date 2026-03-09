@@ -1,4 +1,9 @@
 
+using StackExchange.Redis;
+using TaskFlow.Application.Interfaces.Helpers;
+using TaskFlow.Application.Interfaces.Services;
+using TaskFlow.Infrastructure.Services;
+
 namespace TaskFlow.Api
 {
     public class Program
@@ -14,9 +19,22 @@ namespace TaskFlow.Api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            //==================Services============================
+            builder.Services.AddScoped<ICachingService, RedisCachingService>();
+            builder.Services.AddScoped<ITaskService, ITaskService>();
+
+            //==================Helpers============================
+            builder.Services.AddScoped<IHashHelper, IHashHelper>();
+
+            //==================Redis============================
+            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var config = builder.Configuration.GetConnectionString("Redis");
+                return ConnectionMultiplexer.Connect(config);
+            });
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // ================= Middleware =================
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
