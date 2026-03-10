@@ -11,6 +11,7 @@ public interface IProjectRepository
     Task<int?> AddProject(ProjectEntity project);
     Task<ProjectEntity?> GetProjectById(int id);
     Task<ICollection<ProjectEntity>?> GetAllProjects();
-    Task<int?> UpdateProject(ProjectEntity project);
+    Task<ICollection<ProjectEntity>?> GetProjectsByUserId(int userId);
+    Task<int?> UpdateProject(int id, ProjectEntity project);
     Task<int?> DeleteProjectById(int id);
 }

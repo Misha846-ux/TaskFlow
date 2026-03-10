@@ -15,6 +15,6 @@ public interface ICompanyRepository
     Task<CompanyEntity?> GetCompanyByIdAsync(int id);
     Task<int?> AddCompanyAsync(CompanyEntity company);
     Task<int?> DeleteCompanyByIdAsync(int id);
-    Task<CompanyEntity> UpdateCompanyByIdAsync(CompanyEntity company); //I think it is better to make this method withou id parameter because id is already in companyEntity object and we can get it from there
+    Task<int?> UpdateCompanyByIdAsync(int id, CompanyEntity company); 
 
 }
