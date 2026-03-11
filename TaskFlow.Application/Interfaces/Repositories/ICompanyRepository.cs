@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaskFlow.Domain.Entities;
+using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Application.Interfaces.Repositories;
 
@@ -15,6 +17,14 @@ public interface ICompanyRepository
     Task<CompanyEntity?> GetCompanyByIdAsync(int id);
     Task<int?> AddCompanyAsync(CompanyEntity company);
     Task<int?> DeleteCompanyByIdAsync(int id);
-    Task<int?> UpdateCompanyByIdAsync(int id, CompanyEntity company); 
+    Task<int?> UpdateCompanyByIdAsync();
+
+
+    Task<ICollection<CompanyUserEntity>> GetAllEmploersAsync();
+    Task<ICollection<CompanyUserEntity>> GetAllCompanyEmploersAsync(int companyId);
+    Task<CompanyUserEntity> GetCompanyUserByIdAsync(int id);
+    Task<int?> AddEmployeeToCompanyAsync(CompanyUserEntity companyUserEntity);
+    Task<int?> DeleteEmployeeByIdAsync(int id);
+    Task<int?> UpdateEmployeeAsync();
 
 }
