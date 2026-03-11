@@ -26,13 +26,14 @@ namespace TaskFlow.Application.Interfaces.Services
         /// </summary>
         /// <param name="name">Name of Task</param>
         /// <returns>TaskGetDto or null</returns>
-        Task<ICollection<TaskGetDto?>> GetTaskByNameAsync(string name);
+        Task<ICollection<TaskGetDto?>> GetTaskByNameAsync(string name, int projectId);
         /// <summary>
         /// Return Task by date of DeadLine
         /// </summary>
         /// <param name="date">DeadLine of Task</param>
+        /// <param name="porjectId">The project ID to which the task should belong</param>
         /// <returns>TaskGetDto or null</returns>
-        Task<TaskGetDto?> GetTaskByDeadLineAsync(DateTime date);
+        Task<TaskGetDto?> GetTaskByDeadLineAsync(DateTime date, int porjectId);
         /// <summary>
         /// Create new Task
         /// </summary>

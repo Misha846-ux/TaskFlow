@@ -1,10 +1,12 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Application.DTOs.TaskDto;
 using TaskFlow.Application.DTOs.TaskDTOs;
+using TaskFlow.Application.Interfaces.Repositories;
 using TaskFlow.Application.Interfaces.Services;
 using TaskFlow.Domain.Entities;
 
@@ -22,16 +24,16 @@ namespace TaskFlow.Application.Services
             _cacheService = cacheService;
         }
         //Method for Task creating
-        public Task<int?> CreateTaskAsync(TaskPostDto dto)
+        public async Task<int?> CreateTaskAsync(TaskPostDto dto)
         {
             await _cacheService.RemoveAsync("Tasks");
 
             var task = _mapper.Map<TaskEntity>(dto);
 
-            return await _repository.AddTaskAsync(book, dto.ProjectId);
+            return await _repository.AddTaskAsync(task);
         }
         //Method for Task deleting by id
-        public Task<bool> DeleteTaskByIdAsync(int id)
+        public async Task<bool> DeleteTaskByIdAsync(int id)
         {
             await _cacheService.RemoveAsync("Tasks");
 
@@ -40,12 +42,12 @@ namespace TaskFlow.Application.Services
             if (task == null)
                 return false;
 
-            var result = await _repository.DeleteTaskByIdAsync(task);
+            var result = await _repository.DeleteTaskByIdAsync(task.Id);
 
             return result != null && result > 0;
         }
         //Method for getting all Tasks
-        public Task<ICollection<TaskGetDto>> GetAllTasksAsync()
+        public async Task<ICollection<TaskGetDto>> GetAllTasksAsync()
         {
             var cache = await _cacheService.GetAsync<ICollection<TaskGetDto>>("Tasks");
             if (cache == null)
@@ -63,9 +65,9 @@ namespace TaskFlow.Application.Services
         //    return _mapper.Map<ICollection<TaskGetDto>>(tasks);
         //}
         //Method for Task getting by deadline
-        public Task<TaskGetDto?> GetTaskByDeadLineAsync(DateTime date)
+        public async Task<TaskGetDto?> GetTaskByDeadLineAsync(DateTime date, int projectId)
         {
-            var task = await _repository.GetTaskByDeadLineAsync(date);
+            var task = await _repository.GetProjectTasksByDeadlineAsync(date, projectId);
 
             if (task == null) return null;
 
@@ -74,7 +76,7 @@ namespace TaskFlow.Application.Services
             return dto;
         }
         //Method for Task getting by id
-        public Task<TaskGetDto?> GetTaskByIdAsync(int id)
+        public async Task<TaskGetDto?> GetTaskByIdAsync(int id)
         {
             var task = await _repository.GetTaskByIdAsync(id);
 
@@ -85,22 +87,22 @@ namespace TaskFlow.Application.Services
             return dto;
         }
         //Method for Task getting by name or part of name
-        public Task<ICollection<TaskGetDto?>> GetTaskByNameAsync(string name)
+        public async Task<ICollection<TaskGetDto?>> GetTaskByNameAsync(string name, int projectId)
         {
-            var task = await _repository.GetTaskByNameAsync(name);
+            var task = await _repository.GetProjectTaskByNameAsync(name, projectId);
 
             if (task == null) return null;
 
-            var dto = _mapper.Map<TaskGetDto>(task);
+            var dto = _mapper.Map<ICollection<TaskGetDto>>(task);
 
             return dto;
         }
         //Method for Task updating by id
-        public Task<TaskGetDto?> UpdeteTaskAsync(int id, TaskUpdateDto dto)
+        public async Task<TaskGetDto?> UpdeteTaskAsync(int id, TaskUpdateDto dto)
         {
             await _cacheService.RemoveAsync("Tasks");
             var entity = _mapper.Map<TaskEntity>(dto);
-            var update = await _repository.UpdeteTaskById(id, entity);
+            var update = await _repository.UpdateTaskByIdAsync();
 
             if (update == null) return null;
 

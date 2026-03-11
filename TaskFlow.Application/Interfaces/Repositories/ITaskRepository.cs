@@ -14,7 +14,7 @@ public interface ITaskRepository
     Task<ICollection<TaskEntity>?> GetTasksPaginationAsync(int count, int side);
     Task<ICollection<TaskEntity>?> GetProjectTasksPaginationAsync(int projectId, int count, int side);
     Task<TaskEntity?> GetTaskByIdAsync(int id);
-    Task<ICollection<TaskEntity>?> GetProjectTaskByNameAsync(string name, int projectId, int count, int side); // There can be tasks with the same name so we need to return a collection of tasks but I think it is better to make this method without pagination because we can get all tasks with the same name and then paginate them on the client side if needed
+    Task<ICollection<TaskEntity>?> GetProjectTaskByNameAsync(string name, int projectId); // There can be tasks with the same name so we need to return a collection of tasks but I think it is better to make this method without pagination because we can get all tasks with the same name and then paginate them on the client side if needed
     Task<ICollection<TaskEntity>?> GetProjectTaskByNamePaginationAsync(string name, int projectId, int count, int side);
     Task<ICollection<TaskEntity>?> GetProjectTasksByDeadlineAsync(DateTime dueDate, int projectId);
     Task<int?> DeleteTaskByIdAsync(int id);
