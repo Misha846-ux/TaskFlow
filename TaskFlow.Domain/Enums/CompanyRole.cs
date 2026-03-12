@@ -9,6 +9,7 @@ namespace TaskFlow.Domain.Enums
     public enum CompanyRole
     {
         Owner = 0,
-        Manager = 1
+        Manager = 1,
+        Employee = 2,
     }
 }

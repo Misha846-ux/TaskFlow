@@ -12,7 +12,7 @@ namespace TaskFlow.Domain.Entities
         public int Id { get; set; }
         public int CompanyId { get; set; }
         public int UserId { get; set; }
-        public CompanyRole CompanyRole { get; set; }
+        public CompanyRole CompanyRole { get; set; } = CompanyRole.Employee;
         public CompanyEntity Company { get; set; }
         public UserEntity User { get; set; }
     }

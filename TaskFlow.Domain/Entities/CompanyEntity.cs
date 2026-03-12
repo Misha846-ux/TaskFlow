@@ -12,7 +12,7 @@ namespace TaskFlow.Domain.Entities
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public DateTime CreatedAt { get; set; }
-        public ICollection<ProjectUserEntity> Projects { get; set; }
-        public ICollection<CompanyUserEntity> Companies { get; set; }
+        public ICollection<ProjectEntity> Projects { get; set; }
+        public ICollection<CompanyUserEntity> CompanyUsers { get; set; }
     }
 }

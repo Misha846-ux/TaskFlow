@@ -9,18 +9,18 @@ namespace TaskFlow.Application.Interfaces.Repositories;
 
 public interface IProjectRepository
 {
-    Task<int?> AddProject(ProjectEntity project);
-    Task<ProjectEntity?> GetProjectById(int id);
-    Task<ICollection<ProjectEntity>?> GetAllProjects();
-    Task<ICollection<ProjectEntity>?> GetAllProjectsByUserId(int userId);
-    Task<ICollection<ProjectEntity>?> GetProjectsPaginationAsync(int count, int side);
-    Task<ICollection<ProjectEntity>?> GetProjectsByUserIdPaginationAsync(int userId, int count, int side);
-    Task<int?> UpdateProject();
-    Task<int?> DeleteProjectById(int id);
+    Task<int?> AddProjectAsync(ProjectEntity project CancellationToken cancellationToken);
+    Task<ProjectEntity?> GetProjectByIdAsync(int id, CancellationToken cancellationToken);
+    Task<ICollection<ProjectEntity>?> GetAllProjectsAsync(CancellationToken cancellationToken);
+    Task<ICollection<ProjectEntity>?> GetAllProjectsByUserIdAsync(int userId, CancellationToken cancellationToken);
+    Task<ICollection<ProjectEntity>?> GetProjectsPaginationAsync(int count, int side, CancellationToken cancellationToken);
+    Task<ICollection<ProjectEntity>?> GetProjectsByUserIdPaginationAsync(int userId, int count, int side, CancellationToken cancellationToken);
+    Task UpdateChangesAsync(CancellationToken cancellationToken);
+    Task<int?> DeleteProjectByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<ICollection<ProjectUserEntity>> GetAllUsersAsync();
-    Task<ICollection<ProjectUserEntity>> GetAllProjectUsersAsync(int projectId);
-    Task<ProjectUserEntity> GetUserInProjectyIdAsync(int id);
-    Task<int?> AddUserToProjectAsync(ProjectUserEntity projectUserEntity);
-    Task<int?> DeleteUserProjectAsync(int id);
+    Task<ICollection<ProjectUserEntity>> GetAllUsersAsync(CancellationToken cancellationToken);
+    Task<ICollection<ProjectUserEntity>> GetAllProjectUsersAsync(int projectId, CancellationToken cancellationToken);
+    Task<ProjectUserEntity> GetUserInProjectyIdAsync(int id, CancellationToken cancellationToken);
+    Task<int?> AddUserToProjectAsync(ProjectUserEntity projectUserEntity, CancellationToken cancellationToken);
+    Task<int?> DeleteUserProjectAsync(int id, CancellationToken cancellationToken);
 }
