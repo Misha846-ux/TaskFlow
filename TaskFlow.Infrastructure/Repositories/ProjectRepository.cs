@@ -63,64 +63,230 @@ namespace TaskFlow.Infrastructure.Repositories
             }
         }
 
-        public Task<int?> AddUserToProjectAsync(ProjectUserEntity projectUserEntity, CancellationToken cancellationToken)
+        public async Task<int?> AddUserToProjectAsync(ProjectUserEntity projectUserEntity, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _context.ProjectUsers.AddAsync(projectUserEntity, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+                return projectUserEntity.Id;
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: AddUserToProjectAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with AddUserToProjectAsync");
+            }
         }
 
-        public Task<int?> DeleteProjectByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<int?> DeleteProjectByIdAsync(int id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _context.Projects.Remove(new ProjectEntity { Id = id });
+                await _context.SaveChangesAsync(cancellationToken);
+                return id;
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: DeleteProjectByIdAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with DeleteProjectByIdAsync");
+            }
         }
 
-        public Task<int?> DeleteUserProjectAsync(int id, CancellationToken cancellationToken)
+        public async Task<int?> DeleteUserProjectAsync(int id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _context.ProjectUsers.Remove(new ProjectUserEntity { Id = id });
+                await _context.SaveChangesAsync(cancellationToken);
+                return id;
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: DeleteUserProjectAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with DeleteUserProjectAsync");
+            }
         }
 
-        public Task<ICollection<ProjectEntity>?> GetAllProjectsAsync(CancellationToken cancellationToken)
+        public async Task<ICollection<ProjectEntity>?> GetAllProjectsAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Projects
+                    .Include(p => p.Users)
+                    .Include(p => p.Company)
+                    .Include(p => p.Tasks)
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: GetAllProjectsAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with GetAllProjectsAsync");
+            }
         }
 
-        public Task<ICollection<ProjectEntity>?> GetAllProjectsByUserIdAsync(int userId, CancellationToken cancellationToken)
+        public async Task<ICollection<ProjectEntity>?> GetAllProjectsByUserIdAsync(int userId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Projects
+                    .Include(p => p.Users)
+                    .Include(p => p.Company)
+                    .Include(p => p.Tasks)
+                    .Where(p => p.Users.Any(u => u.Id == userId))
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: GetAllProjectsByUserIdAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with GetAllProjectsByUserIdAsync");
+            }
         }
 
-        public Task<ICollection<ProjectUserEntity>> GetAllProjectUsersAsync(int projectId, CancellationToken cancellationToken)
+        public async Task<ICollection<ProjectUserEntity>> GetAllUserProjectsAsync(int projectId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.ProjectUsers
+                    .Include(u => u.Project)
+                    .Include(u => u.User)
+                    .Where(u => u.Project.Id == projectId)
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: GetAllUserProjectsAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with GetAllUserProjectsAsync");
+            }
         }
 
-        public Task<ICollection<ProjectUserEntity>> GetAllUsersAsync(CancellationToken cancellationToken)
+        public async Task<ProjectEntity?> GetProjectByIdAsync(int id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Projects
+                    .Include(p => p.Users)
+                    .Include(p => p.Tasks)
+                    .Include(p => p.Company)
+                    .SingleOrDefaultAsync(p =>  p.Id == id, cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: GetProjectByIdAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with GetProjectByIdAsync");
+            }
         }
 
-        public Task<ProjectEntity?> GetProjectByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<ICollection<ProjectEntity>?> GetProjectsByUserIdPaginationAsync(int userId, int count, int side, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if(side < 1)
+                {
+                    side = 1;
+                }
+                return await _context.Projects
+                    .Include(p => p.Users)
+                    .Include(p => p.Tasks)
+                    .Include(p => p.Company)
+                    .OrderBy(p => p.Id)
+                    .Skip((side - 1) * count)
+                    .Take(count)
+                    .Where(p => p.Users.Any(p => p.UserId == userId))
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: GetProjectsByUserIdPaginationAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with GetProjectsByUserIdPaginationAsync");
+            }
         }
 
-        public Task<ICollection<ProjectEntity>?> GetProjectsByUserIdPaginationAsync(int userId, int count, int side, CancellationToken cancellationToken)
+        public async Task<ICollection<ProjectEntity>?> GetProjectsPaginationAsync(int count, int side, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if(side < 1)
+                {
+                    side = 1;
+                }
+                return await this._context.Projects
+                    .Include(p => p.Tasks)
+                    .Include(p => p.Users)
+                    .Include(p => p.Company)
+                    .OrderBy(p => p.Id)
+                    .Skip((side - 1) * count)
+                    .Take(count)
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: GetProjectsPaginationAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with GetProjectsPaginationAsync");
+            }
         }
 
-        public Task<ICollection<ProjectEntity>?> GetProjectsPaginationAsync(int count, int side, CancellationToken cancellationToken)
+        public async Task<ProjectUserEntity> GetUserInProjectyIdAsync(int id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.ProjectUsers
+                    .Include(u => u.Project)
+                    .Include(u => u.User)
+                    .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: GetUserInProjectyIdAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with GetUserInProjectyIdAsync");
+            }
         }
 
-        public Task<ProjectUserEntity> GetUserInProjectyIdAsync(int id, CancellationToken cancellationToken)
+        public async Task UpdateChangesAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-        }
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
 
-        public Task UpdateChangesAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: UpdateChangesAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with UpdateChangesAsync");
+            }
         }
     }
 }

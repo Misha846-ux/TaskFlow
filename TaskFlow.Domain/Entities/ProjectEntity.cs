@@ -14,5 +14,6 @@ namespace TaskFlow.Domain.Entities
         public int CompanyId { get; set; }
         public CompanyEntity Company { get; set; }
         public ICollection<ProjectUserEntity> Users { get; set; }
+        public ICollection<TaskEntity> Tasks { get; set; }
     }
 }

@@ -13,7 +13,7 @@ namespace TaskFlow.Domain.Entities
         public string UserName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
-        public GlobalRole GlobalRole { get; set; }
+        public GlobalRole GlobalRole { get; set; } = GlobalRole.User;
         public string PassToIcon { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public string Settings { get; set; } = string.Empty;

@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TaskFlow.Domain.Enums
+namespace TaskFlow.Application.Interfaces.Services
 {
-    public enum TaskStatus
+    public class IUserService
     {
-        Waiting = 0,
-        InProgress = 1,
-        Done = 2
     }
 }

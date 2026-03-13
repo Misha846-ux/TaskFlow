@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TaskFlow.Domain.Enums.TasksEnums;
+namespace TaskFlow.Domain.Enums.TaskEnums;
 
 public enum TaskPriority
 {

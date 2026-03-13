@@ -1,58 +1,220 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaskFlow.Application.Interfaces.Helpers;
 using TaskFlow.Application.Interfaces.Repositories;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        public Task<int?> AddUserAsync(UserEntity user)
+        private readonly TaskFlowDbContext _context;
+        private readonly IHashHelper _hashHelper;
+        public UserRepository(TaskFlowDbContext context, IHashHelper hashHelper)
         {
-            throw new NotImplementedException();
+            _context = context;
+            _hashHelper = hashHelper;
+        }
+        public async Task<int?> AddUserAsync(UserEntity user, string password, CancellationToken cancellationToken)
+        {
+            try
+            {
+                user.PasswordHash = _hashHelper.Hash(password);
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync(cancellationToken);
+                return user.Id;
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: AddUserAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with AddUserAsync");
+            }
         }
 
-        public Task<int?> DeleteUserByIdAsync(int id)
+        public async Task<int?> DeleteUserByIdAsync(int id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _context.Users.Remove(new UserEntity { Id = id });
+                await _context.SaveChangesAsync(cancellationToken);
+                return id;
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: DeleteUserByIdAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with DeleteUserByIdAsync");
+            }
         }
 
-        public Task<ICollection<UserEntity>?> GetAllUsersAsync()
+        public async Task<ICollection<UserEntity>?> GetAllUsersAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Users
+                    .Include(u => u.Tasks)
+                    .Include(u => u.Companies)
+                    .Include(u => u.Projects)
+                    .Include(u => u.Changes)
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: GetAllUsersAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with GetAllUsersAsync");
+            }
         }
 
-        public Task<UserEntity?> GetUserByEmailAsync(string email)
+        public async Task<UserEntity?> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Users
+                    .Include(u => u.Tasks)
+                    .Include(u => u.Companies)
+                    .Include(u => u.Projects)
+                    .Include(u => u.Changes)
+                    .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: GetUserByEmailAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with GetUserByEmailAsync");
+            }
         }
 
-        public Task<UserEntity?> GetUserByIdAsync(int id)
+        public async Task<UserEntity?> GetUserByIdAsync(int id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Users
+                    .Include(u => u.Tasks)
+                    .Include(u => u.Companies)
+                    .Include(u => u.Projects)
+                    .Include(u => u.Changes)
+                    .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: GetUserByIdAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with GetUserByIdAsync");
+            }
         }
 
-        public Task<ICollection<UserEntity>?> GetUsersByNameAsync(string name)
+        public async Task<ICollection<UserEntity>?> GetUsersByNameAsync(string name, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Users
+                    .Include(u => u.Tasks)
+                    .Include(u => u.Companies)
+                    .Include(u => u.Projects)
+                    .Include(u => u.Changes)
+                    .Where(u => u.UserName.Contains(name))
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: GetUsersByNameAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with GetUsersByNameAsync");
+            }
         }
 
-        public Task<ICollection<UserEntity>?> GetUsersByNamePaginationAsync(string name, int count, int side)
+        public async Task<ICollection<UserEntity>?> GetUsersByNamePaginationAsync(string name, int count, int side, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if(side < 1)
+                {
+                    side = 1;
+                }
+                return await _context.Users
+                    .Include(u => u.Tasks)
+                    .Include(u => u.Companies)
+                    .Include(u => u.Projects)
+                    .Include(u => u.Changes)
+                    .OrderBy(u => u.Id)
+                    .Skip((side - 1) * count)
+                    .Take(count)
+                    .Where(u => u.UserName.Contains(name))
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: GetUsersByNamePaginationAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with GetUsersByNamePaginationAsync");
+            }
         }
 
-        public Task<ICollection<UserEntity>?> GetUsersPaginationAsync(int count, int side)
+        public async Task<ICollection<UserEntity>?> GetUsersPaginationAsync(int count, int side, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (side < 1)
+                {
+                    side = 1;
+                }
+                return await _context.Users
+                    .Include(u => u.Tasks)
+                    .Include(u => u.Companies)
+                    .Include(u => u.Projects)
+                    .Include(u => u.Changes)
+                    .OrderBy(u => u.Id)
+                    .Skip((side - 1) * count)
+                    .Take(count)
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: GetUsersPaginationAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with GetUsersPaginationAsync");
+            }
         }
 
-        public Task<int?> UpdateUserByIdAsync()
+        public async Task UpdateAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: UpdateAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with UpdateAsync");
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ namespace TaskFlow.Application.Interfaces.Repositories;
 
 public interface IProjectRepository
 {
-    Task<int?> AddProjectAsync(ProjectEntity project CancellationToken cancellationToken);
+    Task<int?> AddProjectAsync(ProjectEntity project, CancellationToken cancellationToken);
     Task<ProjectEntity?> GetProjectByIdAsync(int id, CancellationToken cancellationToken);
     Task<ICollection<ProjectEntity>?> GetAllProjectsAsync(CancellationToken cancellationToken);
     Task<ICollection<ProjectEntity>?> GetAllProjectsByUserIdAsync(int userId, CancellationToken cancellationToken);
@@ -18,8 +18,7 @@ public interface IProjectRepository
     Task UpdateChangesAsync(CancellationToken cancellationToken);
     Task<int?> DeleteProjectByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<ICollection<ProjectUserEntity>> GetAllUsersAsync(CancellationToken cancellationToken);
-    Task<ICollection<ProjectUserEntity>> GetAllProjectUsersAsync(int projectId, CancellationToken cancellationToken);
+    Task<ICollection<ProjectUserEntity>> GetAllUserProjectsAsync(int projectId, CancellationToken cancellationToken);
     Task<ProjectUserEntity> GetUserInProjectyIdAsync(int id, CancellationToken cancellationToken);
     Task<int?> AddUserToProjectAsync(ProjectUserEntity projectUserEntity, CancellationToken cancellationToken);
     Task<int?> DeleteUserProjectAsync(int id, CancellationToken cancellationToken);

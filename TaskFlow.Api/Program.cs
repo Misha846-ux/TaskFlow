@@ -1,7 +1,9 @@
 
 using StackExchange.Redis;
 using TaskFlow.Application.Interfaces.Helpers;
+using TaskFlow.Application.Interfaces.Repositories;
 using TaskFlow.Application.Interfaces.Services;
+using TaskFlow.Infrastructure.Repositories;
 using TaskFlow.Infrastructure.Services;
 
 namespace TaskFlow.Api
@@ -18,6 +20,12 @@ namespace TaskFlow.Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            //=================Repositories=========================
+            builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+            builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+            builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             //==================Services============================
             builder.Services.AddScoped<ICachingService, RedisCachingService>();
