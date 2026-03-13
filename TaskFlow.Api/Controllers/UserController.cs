@@ -37,7 +37,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="name">Буквосочетание которое должно присутствовать в имени</param>
         /// <returns></returns>
         [HttpGet("Filtred/SearchByName")]
-        public Task<IActionResult> GetByName([FromQuery] int count, int side, string name)
+        public Task<IActionResult> GetByNamePagination([FromQuery] int count, int side, string name)
         {
             return null;
         }
