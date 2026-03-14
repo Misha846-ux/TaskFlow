@@ -16,6 +16,6 @@ public interface IUserRepository
     Task<UserEntity?> GetUserByIdAsync(int id, CancellationToken cancellationToken);
     Task<UserEntity?> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
     Task<int?> DeleteUserByIdAsync(int id, CancellationToken cancellationToken);
-    Task UpdateAsync(CancellationToken cancellationToken); 
+    Task UpdateAsync(CancellationToken cancellationToken);
     Task<int?> AddUserAsync(UserEntity user, string password, CancellationToken cancellationToken);// Method for adding user to database
 }
