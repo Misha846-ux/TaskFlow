@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Application.DTOs.UserDTOs;
+using TaskFlow.Domain.Entities;
 
 namespace TaskFlow.Application.Interfaces.Services
 {
@@ -23,14 +24,14 @@ namespace TaskFlow.Application.Interfaces.Services
         /// <param name="cancellationToken"></param>
         /// <param name="userId">Id of the user who run the request</param>
         /// <returns></returns>
-        Task DeleteUserByIdForUserAsync(int deleteId, int userId, CancellationToken cancellationToken);
+        Task<int?> DeleteUserByIdForUserAsync(int deleteId, int userId, CancellationToken cancellationToken);
         /// <summary>
         /// Allows the admin to delete any user
         /// </summary>
         /// <param name="id">Id of the user who will be deleted</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task DeleteUserByIdForAdminAsync(int id, CancellationToken cancellationToken);
+        Task<int?> DeleteUserByIdForAdminAsync(int id, CancellationToken cancellationToken);
 
         /// <summary>
         /// Allows the user to update only themselves
@@ -49,5 +50,19 @@ namespace TaskFlow.Application.Interfaces.Services
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<UserGetDto> UpdateUserForAdminAsync(UserUpdateDto userUpdateDto, CancellationToken cancellationToken);
+        Task<int?> CreateUserAsync(UserPostDto userPostDto, CancellationToken cancellationToken);
+        Task<RefreshTokenEntity> LoginWithPasswordAsync(UserLoginDto loginDto, CancellationToken cancellationToken);
+        Task<RefreshTokenEntity> LoginWithRecoveryTokenAsync(UserLoginDto userLoginDto, CancellationToken cancellationToken);
+        Task<string> RefreshAsync(string refreshToken, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Returns false if a user with this email address was not found. 
+        /// Returns true and creates a token if the user was found.
+        /// </summary>
+        /// <param name="email">User email</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<bool> CreateRecoveryTokenAsync(string email, CancellationToken cancellationToken);
+
     }
 }

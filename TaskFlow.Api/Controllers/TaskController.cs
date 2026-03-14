@@ -22,9 +22,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
         [HttpGet("admin/get")]
-        public async Task<IActionResult> GetAllTasks([FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
+        public async Task<IActionResult> GetAllTasks([FromQuery] int pagenum = 1, [FromQuery] int limit = 10, CancellationToken cancellationToken)
         {
-            var tasks = await _taskService.GetAllTasksAsync();
+            var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
             var chunk = tasks
             .Skip((pagenum - 1) * limit)
                 .Take(limit);
@@ -38,9 +38,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
         [HttpGet("admin/get/{id}")]
-        public async Task<IActionResult> GetTaskById([FromRoute] int id)
+        public async Task<IActionResult> GetTaskById([FromRoute] int id, CancellationToken cancellationToken)
         {
-            var task = await _taskService.GetTaskByIdAsync(id);
+            var task = await _taskService.GetTaskByIdAsync(id, cancellationToken);
             return Ok(task);
         }
 
@@ -53,9 +53,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpGet("get/{name}")]
-        public async Task<IActionResult> GetTaskByName([FromRoute] string name, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
+        public async Task<IActionResult> GetTaskByName([FromRoute] string name, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10, CancellationToken cancellationToken)
         {
-            var tasks = await _taskService.GetTaskByNameAsync(name, 100); // ВРЕМЕНННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА
+            var tasks = await _taskService.GetTaskByNameAsync(name, 100, cancellationToken); // ВРЕМЕНННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА
             Console.WriteLine("ВРЕМЕННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА в методе GetTaskByName. Руслан поработаешь с этим");
             var chunk = tasks
             .Skip((pagenum - 1) * limit)
@@ -70,9 +70,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpGet("get/{date}")]
-        public async Task<IActionResult> GetTaskByDeadLine([FromRoute] DateTime date)
+        public async Task<IActionResult> GetTaskByDeadLine([FromRoute] DateTime date, CancellationToken cancellationToken)
         {
-            var task = await _taskService.GetTaskByDeadLineAsync(date, 100); //ВРЕМЕННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА
+            var task = await _taskService.GetTaskByDeadLineAsync(date, 100, cancellationToken); //ВРЕМЕННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА
             Console.WriteLine("ВРЕМЕННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА в методе GetTaskByDeadLine. Руслан поработаешь с этим");
             return Ok(task);
         }
@@ -85,9 +85,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.User))]
         [HttpGet("user/get")]
-        public async Task<IActionResult> GetAllUserTasks([FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
+        public async Task<IActionResult> GetAllUserTasks([FromQuery] int pagenum = 1, [FromQuery] int limit = 10, CancellationToken cancellationToken)
         {
-            var tasks = await _taskService.GetAllTasksAsync();
+            var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
             var chunk = tasks
             .Skip((pagenum - 1) * limit)
                 .Take(limit);
@@ -101,9 +101,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.User))]
         [HttpGet("user/get/{id}")]
-        public async Task<IActionResult> GetUserTaskById([FromRoute] int id)
+        public async Task<IActionResult> GetUserTaskById([FromRoute] int id, CancellationToken cancellationToken)
         {
-            var task = await _taskService.GetTaskByIdAsync(id);
+            var task = await _taskService.GetTaskByIdAsync(id, cancellationToken);
             return Ok(task);
         }
 
@@ -116,9 +116,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPost("post")]
-        public async Task<IActionResult> AddTask([FromBody] TaskPostDto dto)
+        public async Task<IActionResult> AddTask([FromBody] TaskPostDto dto, CancellationToken cancellationToken)
         {
-            int? id = await _taskService.CreateTaskAsync(dto);
+            int? id = await _taskService.CreateTaskAsync(dto, cancellationToken);
             if (id != null)
             {
                 return CreatedAtAction(nameof(GetTaskById), new { id }, id);
@@ -139,9 +139,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
         [HttpPut("admin/update/{id}")]
-        public async Task<IActionResult> UpdateTask(int id, TaskUpdateDto dto)
+        public async Task<IActionResult> UpdateTask(int id, TaskUpdateDto dto, CancellationToken cancellationToken)
         {
-            var result = await _taskService.UpdeteTaskAsync(id, dto);
+            var result = await _taskService.UpdeteTaskAsync(id, dto, cancellationToken);
 
             if (result == null)
                 return NotFound();
@@ -157,9 +157,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.User))]
         [HttpPut("user/update/{id}")]
-        public async Task<IActionResult> UpdateUserTask(int id, TaskUpdateDto dto)
+        public async Task<IActionResult> UpdateUserTask(int id, TaskUpdateDto dto, CancellationToken cancellationToken)
         {
-            var result = await _taskService.UpdeteTaskAsync(id, dto);
+            var result = await _taskService.UpdeteTaskAsync(id, dto, cancellationToken);
 
             if (result == null)
                 return NotFound();
@@ -176,9 +176,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
         [HttpDelete("admin/delete/{id}")]
-        public async Task<IActionResult> DeleteTaskById(int id)
+        public async Task<IActionResult> DeleteTaskById(int id, CancellationToken cancellationToken)
         {
-            var success = await _taskService.DeleteTaskByIdAsync(id);
+            var success = await _taskService.DeleteTaskByIdAsync(id, cancellationToken);
 
             if (!success)
                 return NotFound();
@@ -193,9 +193,9 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.User))]
         [HttpDelete("user/delete/{id}")]
-        public async Task<IActionResult> DeleteUserTaskById(int id)
+        public async Task<IActionResult> DeleteUserTaskById(int id, CancellationToken cancellationToken)
         {
-            var success = await _taskService.DeleteTaskByIdAsync(id);
+            var success = await _taskService.DeleteTaskByIdAsync(id, cancellationToken);
 
             if (!success)
                 return NotFound();

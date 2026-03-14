@@ -67,6 +67,7 @@ namespace TaskFlow.Infrastructure.Repositories
                     .Include(u => u.Companies)
                     .Include(u => u.Projects)
                     .Include(u => u.Changes)
+                    .Include(u => u.RefreshTokens)
                     .ToListAsync(cancellationToken);
             }
             catch (OperationCanceledException oex)
@@ -88,6 +89,7 @@ namespace TaskFlow.Infrastructure.Repositories
                     .Include(u => u.Companies)
                     .Include(u => u.Projects)
                     .Include(u => u.Changes)
+                    .Include(u => u.RefreshTokens)
                     .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
 
             }
@@ -110,6 +112,7 @@ namespace TaskFlow.Infrastructure.Repositories
                     .Include(u => u.Companies)
                     .Include(u => u.Projects)
                     .Include(u => u.Changes)
+                    .Include(u => u.RefreshTokens)
                     .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
             }
             catch (OperationCanceledException oex)
@@ -131,6 +134,7 @@ namespace TaskFlow.Infrastructure.Repositories
                     .Include(u => u.Companies)
                     .Include(u => u.Projects)
                     .Include(u => u.Changes)
+                    .Include(u => u.RefreshTokens)
                     .Where(u => u.UserName.Contains(name))
                     .ToListAsync(cancellationToken);
             }
@@ -157,6 +161,7 @@ namespace TaskFlow.Infrastructure.Repositories
                     .Include(u => u.Companies)
                     .Include(u => u.Projects)
                     .Include(u => u.Changes)
+                    .Include(u => u.RefreshTokens)
                     .OrderBy(u => u.Id)
                     .Skip((side - 1) * count)
                     .Take(count)
@@ -186,6 +191,7 @@ namespace TaskFlow.Infrastructure.Repositories
                     .Include(u => u.Companies)
                     .Include(u => u.Projects)
                     .Include(u => u.Changes)
+                    .Include(u => u.RefreshTokens)
                     .OrderBy(u => u.Id)
                     .Skip((side - 1) * count)
                     .Take(count)

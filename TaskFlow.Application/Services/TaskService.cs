@@ -24,35 +24,35 @@ namespace TaskFlow.Application.Services
             _cacheService = cacheService;
         }
         //Method for Task creating
-        public async Task<int?> CreateTaskAsync(TaskPostDto dto)
+        public async Task<int?> CreateTaskAsync(TaskPostDto dto, CancellationToken cancellationToken)
         {
             await _cacheService.RemoveAsync("Tasks");
 
             var task = _mapper.Map<TaskEntity>(dto);
 
-            return await _repository.AddTaskAsync(task);
+            return await _repository.AddTaskAsync(task, cancellationToken);
         }
         //Method for Task deleting by id
-        public async Task<bool> DeleteTaskByIdAsync(int id)
+        public async Task<bool> DeleteTaskByIdAsync(int id, CancellationToken cancellationToken)
         {
             await _cacheService.RemoveAsync("Tasks");
 
-            var task = await _repository.GetTaskByIdAsync(id);
+            var task = await _repository.GetTaskByIdAsync(id, cancellationToken);
 
             if (task == null)
                 return false;
 
-            var result = await _repository.DeleteTaskByIdAsync(task.Id);
+            var result = await _repository.DeleteTaskByIdAsync(task.Id, cancellationToken);
 
             return result != null && result > 0;
         }
         //Method for getting all Tasks
-        public async Task<ICollection<TaskGetDto>> GetAllTasksAsync()
+        public async Task<ICollection<TaskGetDto>> GetAllTasksAsync(CancellationToken cancellationToken)
         {
             var cache = await _cacheService.GetAsync<ICollection<TaskGetDto>>("Tasks");
             if (cache == null)
             {
-                var tasks = await _repository.GetAllTasksAsync();
+                var tasks = await _repository.GetAllTasksAsync(cancellationToken);
                 cache = _mapper.Map<ICollection<TaskGetDto>>(tasks);
                 await _cacheService.SetAsync("Tasks", cache, null);
             }
@@ -65,9 +65,9 @@ namespace TaskFlow.Application.Services
         //    return _mapper.Map<ICollection<TaskGetDto>>(tasks);
         //}
         //Method for Task getting by deadline
-        public async Task<TaskGetDto?> GetTaskByDeadLineAsync(DateTime date, int projectId)
+        public async Task<TaskGetDto?> GetTaskByDeadLineAsync(DateTime date, int projectId, CancellationToken cancellationToken)
         {
-            var task = await _repository.GetProjectTasksByDeadlineAsync(date, projectId);
+            var task = await _repository.GetProjectTasksByDeadlineAsync(date, projectId, cancellationToken);
 
             if (task == null) return null;
 
@@ -76,9 +76,9 @@ namespace TaskFlow.Application.Services
             return dto;
         }
         //Method for Task getting by id
-        public async Task<TaskGetDto?> GetTaskByIdAsync(int id)
+        public async Task<TaskGetDto?> GetTaskByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var task = await _repository.GetTaskByIdAsync(id);
+            var task = await _repository.GetTaskByIdAsync(id, cancellationToken);
 
             if (task == null) return null;
 
@@ -87,9 +87,9 @@ namespace TaskFlow.Application.Services
             return dto;
         }
         //Method for Task getting by name or part of name
-        public async Task<ICollection<TaskGetDto?>> GetTaskByNameAsync(string name, int projectId)
+        public async Task<ICollection<TaskGetDto?>> GetTaskByNameAsync(string name, int projectId, CancellationToken cancellationToken)
         {
-            var task = await _repository.GetProjectTaskByNameAsync(name, projectId);
+            var task = await _repository.GetProjectTaskByNameAsync(name, projectId, cancellationToken);
 
             if (task == null) return null;
 
@@ -98,15 +98,14 @@ namespace TaskFlow.Application.Services
             return dto;
         }
         //Method for Task updating by id
-        public async Task<TaskGetDto?> UpdeteTaskAsync(int id, TaskUpdateDto dto)
+        public async Task<TaskGetDto?> UpdeteTaskAsync(int id, TaskUpdateDto dto, CancellationToken cancellationToken)
         {
             await _cacheService.RemoveAsync("Tasks");
             var entity = _mapper.Map<TaskEntity>(dto);
-            var update = await _repository.UpdateTaskByIdAsync();
+            await _repository.UpdateAsync(cancellationToken);
 
-            if (update == null) return null;
 
-            return _mapper.Map<TaskGetDto>(update);
+            return _mapper.Map<TaskGetDto>(entity);
         }
     }
 }
