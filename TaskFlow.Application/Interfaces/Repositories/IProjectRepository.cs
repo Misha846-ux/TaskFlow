@@ -15,12 +15,13 @@ namespace TaskFlow.Application.Interfaces.Repositories
         Task<ICollection<ProjectEntity>?> GetAllProjectsByUserIdAsync(int userId, CancellationToken cancellationToken);
         Task<ICollection<ProjectEntity>?> GetProjectsPaginationAsync(int count, int side, CancellationToken cancellationToken);
         Task<ICollection<ProjectEntity>?> GetProjectsByUserIdPaginationAsync(int userId, int count, int side, CancellationToken cancellationToken);
-        Task UpdateChangesAsync(CancellationToken cancellationToken);
+        Task<ProjectEntity> UpdateProjectAsync(ProjectEntity newProject, CancellationToken cancellationToken);
         Task<int?> DeleteProjectByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<ICollection<ProjectUserEntity>> GetAllUserProjectsAsync(int projectId, CancellationToken cancellationToken);
+        Task<ICollection<ProjectUserEntity>> GetAllUserProjectsAsync(int projectId, CancellationToken cancellationToken);
         Task<ProjectUserEntity> GetUserInProjectyIdAsync(int id, CancellationToken cancellationToken);
         Task<int?> AddUserToProjectAsync(ProjectUserEntity projectUserEntity, CancellationToken cancellationToken);
         Task<int?> DeleteUserProjectAsync(int id, CancellationToken cancellationToken);
+        Task<ProjectUserEntity> UpdateProjectUserAsync(ProjectUserEntity newProjectUser, CancellationToken cancellationToken);
     }
 }

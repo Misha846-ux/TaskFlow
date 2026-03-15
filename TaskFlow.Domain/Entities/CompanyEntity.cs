@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,9 +10,11 @@ namespace TaskFlow.Domain.Entities
     public class CompanyEntity
     {
         public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
+        [Required]
+        public string? Name { get; set; }
         public string? Description { get; set; }
-        public DateTime CreatedAt { get; set; }
+        [Required]
+        public DateTime? CreatedAt { get; set; }
         public ICollection<ProjectEntity> Projects { get; set; }
         public ICollection<CompanyUserEntity> CompanyUsers { get; set; }
     }

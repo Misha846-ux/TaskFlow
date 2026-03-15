@@ -24,6 +24,7 @@ public interface ICompanyRepository
     Task<CompanyUserEntity> GetCompanyUserByIdAsync(int id, CancellationToken cancellationToken);
     Task<int?> AddEmployeeToCompanyAsync(CompanyUserEntity companyUserEntity, CancellationToken cancellationToken);
     Task<int?> DeleteEmployeeByIdAsync(int id, CancellationToken cancellationToken);
-    Task UpdateChangesAsync(CancellationToken cancellationToken);
+    Task<CompanyEntity> UpdateCompanyAsync(CompanyEntity newCompany, CancellationToken cancellationToken);
+    Task<CompanyUserEntity> UpdateCompanyUserAsync(CompanyUserEntity newCompanyUser, CancellationToken cancellationToken);
 
 }

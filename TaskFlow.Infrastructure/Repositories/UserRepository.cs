@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Application.Interfaces.Helpers;
@@ -207,11 +208,25 @@ namespace TaskFlow.Infrastructure.Repositories
             }
         }
 
-        public async Task UpdateAsync(CancellationToken cancellationToken)
+        public async Task<UserEntity> UpdateAsync(UserEntity newUser, CancellationToken cancellationToken)
         {
             try
             {
+                UserEntity user = await GetUserByIdAsync(newUser.Id, cancellationToken);
+                if (user == null)
+                {
+                    throw new Exception();
+                }
+                PropertyInfo[] properties = typeof(UserEntity).GetProperties();
+                foreach (PropertyInfo prop in properties)
+                {
+                    if(prop.GetValue(newUser) != null)
+                    {
+                        prop.SetValue(user, newUser);
+                    }
+                }
                 await _context.SaveChangesAsync(cancellationToken);
+                return user;
             }
             catch (OperationCanceledException oex)
             {

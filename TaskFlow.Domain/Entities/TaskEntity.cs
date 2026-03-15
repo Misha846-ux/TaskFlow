@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,18 +8,24 @@ using TaskFlow.Domain.Enums.TaskEnums;
 
 namespace TaskFlow.Domain.Entities
 {
-public class TaskEntity
-{
-    public int Id { get; set; }
-    public TaskFlow.Domain.Enums.TaskEnums.TaskStatus Status { get; set; } = Enums.TaskEnums.TaskStatus.Waiting;
-    public string TaskName { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public TaskPriority Priority { get; set; } = TaskPriority.Medium;
-    public DateTime CreatedAt { get; set; }
-    public DateTime DeadLine { get; set; }
-    public int ProjectId { get; set; }
-    public int UserId { get; set; }
-    public ProjectEntity Project { get; set; }
-    public UserEntity User { get; set; }
-}
+    public class TaskEntity
+    {
+        public int Id { get; set; }
+        [Required]
+        public TaskFlow.Domain.Enums.TaskEnums.TaskStatus? Status { get; set; }
+        [Required]
+        public string? TaskName { get; set; }
+        public string? Description { get; set; }
+        [Required]
+        public TaskPriority? Priority { get; set; }
+        [Required]
+        public DateTime? CreatedAt { get; set; }
+        [Required]
+        public DateTime? DeadLine { get; set; }
+        [Required]
+        public int? ProjectId { get; set; }
+        public int? UserId { get; set; }
+        public ProjectEntity Project { get; set; }
+        public UserEntity User { get; set; }
+    }
 }

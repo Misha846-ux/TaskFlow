@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Application.Interfaces.Repositories;
@@ -274,11 +275,25 @@ namespace TaskFlow.Infrastructure.Repositories
             }
         }
 
-        public async Task UpdateAsync(CancellationToken cancellationToken)
+        public async Task<TaskEntity> UpdateAsync(TaskEntity newTask, CancellationToken cancellationToken)
         {
             try
             {
+                TaskEntity task = await GetTaskByIdAsync(newTask.Id, cancellationToken);
+                if(task == null)
+                {
+                    throw new Exception();
+                }
+                PropertyInfo[] properties = typeof(TaskEntity).GetProperties();
+                foreach (PropertyInfo prop in properties)
+                {
+                    if(prop.GetValue(newTask) != null)
+                    {
+                        prop.SetValue(task, newTask);
+                    }
+                }
                 await _context.SaveChangesAsync(cancellationToken);
+                return task;
             }
             catch (OperationCanceledException oex)
             {

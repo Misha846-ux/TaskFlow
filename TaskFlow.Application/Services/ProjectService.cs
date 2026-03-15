@@ -203,20 +203,16 @@ namespace TaskFlow.Application.Services
             if (!userProjects.Any(x => x.Id == id))
                 return;
 
-            var project = await _repository.GetProjectByIdAsync(id, cancellationToken);
+            ProjectEntity project = _mapper.Map<ProjectEntity>(userProjects);
 
-            project.Title = dto.Title;
-
-            await _repository.UpdateChangesAsync(cancellationToken);
+            await _repository.UpdateProjectAsync(project, cancellationToken);
         }
 
         public async Task UpdateProjectAdminAsync(int id, UpdateProjectDto dto, CancellationToken cancellationToken)
         {
-            var project = await _repository.GetProjectByIdAsync(id, cancellationToken);
+            var project = _mapper.Map<ProjectEntity>(dto);
 
-            project.Title = dto.Title;
-
-            await _repository.UpdateChangesAsync(cancellationToken);
+            await _repository.UpdateProjectAsync(project, cancellationToken);
         }
 
         public async Task<int?> DeleteProjectAsync(int id, int userId, CancellationToken cancellationToken)

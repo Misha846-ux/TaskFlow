@@ -17,21 +17,7 @@ namespace TaskFlow.Application.Interfaces.Services
         Task<UserGetDto> GetUserByIdAsync(int id, CancellationToken cancellationToken);
         Task<UserGetDto> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
 
-        /// <summary>
-        /// Allows the user to delete only themselves.
-        /// </summary>
-        /// <param name="deleteId">Id of user who will be deleted</param>
-        /// <param name="cancellationToken"></param>
-        /// <param name="userId">Id of the user who run the request</param>
-        /// <returns></returns>
-        Task<int?> DeleteUserByIdForUserAsync(int deleteId, int userId, CancellationToken cancellationToken);
-        /// <summary>
-        /// Allows the admin to delete any user
-        /// </summary>
-        /// <param name="id">Id of the user who will be deleted</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<int?> DeleteUserByIdForAdminAsync(int id, CancellationToken cancellationToken);
+        Task<int?> DeleteUserByIdAsync(int id, CancellationToken cancellationToken);
 
         /// <summary>
         /// Allows the user to update only themselves

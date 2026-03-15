@@ -31,7 +31,7 @@ namespace TaskFlow.Api.Controllers
         /// нет то выдаёт ошибку.
         /// </summary>
         /// <returns></returns>
-        [HttpPut("ForgotPassword/GetToken")]
+        [HttpPut("ForgotPassword/GetToken{email}")]
         public Task<IActionResult> ForgotPassword([FromRoute] string email)
         {
             return null;

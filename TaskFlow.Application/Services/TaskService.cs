@@ -102,7 +102,7 @@ namespace TaskFlow.Application.Services
         {
             await _cacheService.RemoveAsync("Tasks");
             var entity = _mapper.Map<TaskEntity>(dto);
-            await _repository.UpdateAsync(cancellationToken);
+            await _repository.UpdateAsync(entity, cancellationToken);
 
 
             return _mapper.Map<TaskGetDto>(entity);

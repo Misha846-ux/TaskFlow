@@ -47,19 +47,19 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="name">Буквосочетание которое должно присутствовать в имени</param>
         /// <returns></returns>
-        [HttpGet("SearchByName")]
+        [HttpGet("SearchByName{name}")]
         public Task<IActionResult> GetByName([FromRoute] string name)
         {
             return null;
         }
 
-        [HttpGet("ById")]
+        [HttpGet("ById{id}")]
         public Task<IActionResult> GetById([FromRoute] int id)
         {
             return null;
         }
 
-        [HttpGet("ByEmail")]
+        [HttpGet("ByEmail{rout}")]
         public Task<IActionResult> GetByEmail([FromRoute] string rout)
         {
             return null;
@@ -74,7 +74,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id">id пользователя который будет удалён</param>
         /// <returns></returns>
-        [HttpDelete("DeleteForAdmin")]
+        [HttpDelete("DeleteForAdmin{id}")]
         [Authorize(Roles = "Admin")]
         public Task<IActionResult> DeleteForAdmin([FromRoute] int id)
         {

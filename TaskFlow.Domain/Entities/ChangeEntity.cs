@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,9 +11,12 @@ namespace TaskFlow.Domain.Entities
     public class ChangeEntity
     {
         public int Id { get; set; }
-        public ChangeTableType Table { get; set; }
-        public int NoteId { get; set; }
-        public int UserId { get; set; }
+        [Required]
+        public ChangeTableType? Table { get; set; }
+        [Required]
+        public int? NoteId { get; set; }
+        [Required]
+        public int? UserId { get; set; }
         public UserEntity User { get; set; }
     }
 }

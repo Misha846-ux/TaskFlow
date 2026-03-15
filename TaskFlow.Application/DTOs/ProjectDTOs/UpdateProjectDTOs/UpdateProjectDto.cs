@@ -14,6 +14,7 @@ namespace TaskFlow.Application.DTOs.ProjectDTOs.UpdateProjectDTOs
     /// </summary>
     public class UpdateProjectDto
     {
+        public int id {  get; set; }
         [Required]
         [StringLength(100, MinimumLength = 3)]
         public string Title { get; set; } = null!;

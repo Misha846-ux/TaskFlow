@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Application.Interfaces.Repositories;
@@ -272,20 +273,63 @@ namespace TaskFlow.Infrastructure.Repositories
             }
         }
 
-        public async Task UpdateChangesAsync(CancellationToken cancellationToken)
+        public async Task<ProjectEntity> UpdateProjectAsync(ProjectEntity newProject, CancellationToken cancellationToken)
         {
             try
             {
+                ProjectEntity project = await GetProjectByIdAsync(newProject.Id, cancellationToken);
+                if (project == null)
+                {
+                    throw new Exception();
+                }
+                PropertyInfo[] properties = typeof(ProjectEntity).GetProperties();
+                foreach (PropertyInfo prop in properties)
+                {
+                    if(prop.GetValue(newProject) != null)
+                    {
+                        prop.SetValue(project, newProject);
+                    }
+                }
                 await _context.SaveChangesAsync(cancellationToken);
-
+                return project;
             }
             catch (OperationCanceledException oex)
             {
-                throw new Exception("Project Repository: UpdateChangesAsync operation were canceled");
+                throw new Exception("Project Repository: UpdateProjectAsync operation were canceled");
             }
             catch (Exception ex)
             {
-                throw new Exception("Project Repository: Problem with UpdateChangesAsync");
+                throw new Exception("Project Repository: Problem with UpdateProjectAsync");
+            }
+        }
+
+        public async Task<ProjectUserEntity> UpdateProjectUserAsync(ProjectUserEntity newProjectUser, CancellationToken cancellationToken)
+        {
+            try
+            {
+                ProjectUserEntity projectUser = await GetUserInProjectyIdAsync(newProjectUser.Id, cancellationToken);
+                if (projectUser == null)
+                {
+                    throw new Exception();
+                }
+                PropertyInfo[] properties = typeof(ProjectUserEntity).GetProperties();
+                foreach (PropertyInfo prop in properties)
+                {
+                    if(prop.GetValue(newProjectUser) != null)
+                    {
+                        prop.SetValue(projectUser, newProjectUser);
+                    }
+                }
+                await _context.SaveChangesAsync(cancellationToken);
+                return newProjectUser;
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Project Repository: UpdateProjectUserAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Project Repository: Problem with UpdateProjectUserAsync");
             }
         }
     }

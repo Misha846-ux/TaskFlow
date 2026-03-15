@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Domain.Entities;
 
-namespace TaskFlow.Infrastructure.Configurations
+namespace TaskFlow.Infrastructure.Configurations.DbConfigurations
 {
     public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshTokenEntity>
     {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Application.Interfaces.Repositories;
@@ -264,19 +265,68 @@ namespace TaskFlow.Infrastructure.Repositories
             }
         }
 
-        public async Task UpdateChangesAsync(CancellationToken cancellationToken)
+        public async Task<CompanyEntity> UpdateCompanyAsync(CompanyEntity newCompany, CancellationToken cancellationToken)
         {
             try
             {
+                CompanyEntity company = await GetCompanyByIdAsync(newCompany.Id, cancellationToken);
+                if (company == null)
+                {
+                    throw new Exception();
+                }
+
+                PropertyInfo[] companyProperties = typeof(CompanyEntity).GetType().GetProperties();
+                foreach(var prop in companyProperties)
+                {
+                    if(prop.GetValue(newCompany) != null)
+                    {
+                        prop.SetValue(company, newCompany);
+                    }
+                }
+
                 await _context.SaveChangesAsync(cancellationToken);
+
+                return company;
             }
             catch (OperationCanceledException oex)
             {
-                throw new Exception("Company Repository: UpdateChangesAsync operation were canceled");
+                throw new Exception("Company Repository: UpdateCompanyAsync operation were canceled");
             }
             catch (Exception ex)
             {
-                throw new Exception("Company Repository: Problem with UpdateChangesAsync");
+                throw new Exception("Company Repository: Problem with UpdateCompanyAsync");
+            }
+        }
+
+        public async Task<CompanyUserEntity> UpdateCompanyUserAsync(CompanyUserEntity newCompanyUser, CancellationToken cancellationToken)
+        {
+            try
+            {
+                CompanyUserEntity companyUser = await GetCompanyUserByIdAsync(newCompanyUser.Id, cancellationToken);
+                if (companyUser == null)
+                {
+                    throw new Exception();
+                }
+
+                PropertyInfo[] properties = typeof(CompanyUserEntity).GetType().GetProperties();
+                foreach (var prop in properties)
+                {
+                    if (prop.GetValue(newCompanyUser) != null)
+                    {
+                        prop.SetValue(companyUser, newCompanyUser);
+                    }
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
+                return newCompanyUser;
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Company Repository: UpdateCompanyUserAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Company Repository: Problem with UpdateCompanyUserAsync");
             }
         }
     }
