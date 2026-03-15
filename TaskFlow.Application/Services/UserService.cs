@@ -17,7 +17,7 @@ namespace TaskFlow.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IHashHelper _hashHelper;
         private readonly IMapper _mapper;
-        public UserService(IUserRepository userRepository, IMapper mapper,, IHashHelper hashHelper)
+        public UserService(IUserRepository userRepository, IMapper mapper, IHashHelper hashHelper)
         {
             _userRepository = userRepository;
             _hashHelper = hashHelper;
