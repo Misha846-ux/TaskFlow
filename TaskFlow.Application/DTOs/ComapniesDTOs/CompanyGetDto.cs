@@ -15,6 +15,7 @@ namespace TaskFlow.Application.DTOs.ComapniesDTOs
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
+        public ICollection<int> ProjectsId { get; set; }
         public ICollection<int> EmploeesId { get; set; }
     }
 }
