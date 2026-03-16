@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-<<<<<<< HEAD
 using System.Security.AccessControl;
-=======
 using System.Security.Cryptography;
->>>>>>> origin/master
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -25,28 +22,19 @@ namespace TaskFlow.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IHashHelper _hashHelper;
         private readonly IMapper _mapper;
-<<<<<<< HEAD
-        private readonly ITokenService _tokenService;
         private readonly ICachingService _cacheService;
-
-        public UserService(IUserRepository userRepository, IMapper mapper, IHashHelper hashHelper
-            , ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, ICachingService cacheService)
-=======
         private readonly IJwtService _tokenService;
 
         public UserService(IUserRepository userRepository, IMapper mapper, IHashHelper hashHelper
-            , IJwtService tokenService)
->>>>>>> origin/master
+            , IJwtService tokenService, ICachingService cacheService) //IRefreshTokenRepository refreshTokenRepository)
         {
             _userRepository = userRepository;
             _hashHelper = hashHelper;
             _mapper = mapper;
             _tokenService = tokenService;
-<<<<<<< HEAD
-            _refreshTokenRepository = refreshTokenRepository;
+            //_refreshTokenRepository = refreshTokenRepository;
             _cacheService = cacheService;
-=======
->>>>>>> origin/master
+
         }
 
         public async Task<string> CreateRecoveryTokenAsync(string email, CancellationToken cancellationToken)
