@@ -212,7 +212,7 @@ namespace TaskFlow.Application.Services
                 {
                     throw new UnauthorizedAccessException();
                 }
-                else if (user.RecoveryTokenLifeTime == DateTime.Now)
+                else if (user.RecoveryTokenLifeTime >= DateTime.Now)
                 {
                     throw new UnauthorizedAccessException();
                 }

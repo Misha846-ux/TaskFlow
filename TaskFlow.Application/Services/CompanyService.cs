@@ -75,9 +75,8 @@ public class CompanyService : ICompanyService
     public async Task<ICollection<CompanyGetDto>> GetAllCompaniesAsync(CancellationToken cancellationToken)
     {
         var entities = await _companyRepository.GetAllCompaniesAsync(cancellationToken);
-        if (entities == null) return new List<CompanyGetDto>();
 
-        return _mapper<CompanyGetDto>(entities);
+        return _mapper.Map<ICollection<CompanyGetDto>>(entities);
     }
 
     public async Task<ICollection<CompanyGetDto>> GetCompaniesPaginationAsync(int count, int side, CancellationToken cancellationToken)
@@ -85,28 +84,28 @@ public class CompanyService : ICompanyService
         var entities = await _companyRepository.GetCompaniesPaginationAsync(count, side, cancellationToken);
         if (entities == null) return new List<CompanyGetDto>();
 
-        return entities.Select(MapToDto).ToList();
+        return _mapper.Map<ICollection<CompanyGetDto>>(entities);
     }
 
     public async Task<CompanyGetDto?> GetCompanyByIdAsync(int id, CancellationToken cancellationToken)
     {
         var entity = await _companyRepository.GetCompanyByIdAsync(id, cancellationToken);
         if (entity == null) return null;
-        return MapToDto(entity);
+        return _mapper.Map<CompanyGetDto>(entity);
     }
 
     public async Task<ICollection<CompanyGetDto>> GetUsersCompaniesAsync(int userId, CancellationToken cancellationToken)
     {
         var entities = await _companyRepository.GetCompaniesByUserIdAsync(userId, cancellationToken);
         if (entities == null) return new List<CompanyGetDto>();
-        return entities.Select(MapToDto).ToList();
+        return _mapper.Map<ICollection<CompanyGetDto>>(entities);
     }
 
     public async Task<ICollection<CompanyGetDto>> GetUsersCompaniesPaginationAsync(int userId, int side, int count, CancellationToken cancellationToken)
     {
         var entities = await _companyRepository.GetCompaniesByUserIdPaginationAsync(userId, count, side, cancellationToken);
         if (entities == null) return new List<CompanyGetDto>();
-        return entities.Select(MapToDto).ToList();
+        return _mapper.Map<ICollection<CompanyGetDto>>(entities);
     }
 
     public async Task<CompanyGetDto?> GetUsersCompanyByIdAsync(int id, int userId, CancellationToken cancellationToken)
@@ -120,7 +119,7 @@ public class CompanyService : ICompanyService
             throw new UnauthorizedAccessException("User is not a member of this company.");
         }
 
-        return MapToDto(company);
+        return _mapper.Map<CompanyGetDto>(company);
     }
 
     public async Task<int?> UpdateCompanyByIdAsync(int id, CompanyUpdateDto dto, CancellationToken cancellationToken)
@@ -148,7 +147,7 @@ public class CompanyService : ICompanyService
 
         // проверка прав — допускаем владельца или администратора компании
         var hasRight = company.CompanyUsers?.Any(u =>
-            u.UserId == userId && (u.CompanyRole == CompanyRole.Owner || u.CompanyRole == CompanyRole.Admin)) ?? false;
+            u.UserId == userId && (u.CompanyRole == CompanyRole.Owner || u.CompanyRole == CompanyRole.Manager)) ?? false;
 
         if (!hasRight)
             throw new UnauthorizedAccessException("User has no rights to update this company.");
