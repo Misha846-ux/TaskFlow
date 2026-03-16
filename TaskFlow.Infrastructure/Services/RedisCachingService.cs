@@ -23,23 +23,56 @@ namespace TaskFlow.Infrastructure.Services
         }
         public async Task<T?> GetAsync<T>(string key)
         {
-            var value = await _database.StringGetAsync(key);
-            if (value.IsNullOrEmpty)
+            try
             {
-                return default(T?);
+                var value = await _database.StringGetAsync(key);
+                if (value.IsNullOrEmpty)
+                {
+                    return default(T?);
+                }
+                return JsonSerializer.Deserialize<T>(value);
             }
-            return JsonSerializer.Deserialize<T>(value);
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("RedisCache Sevice: GetAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("RedisCache Service: Problem with GetAsync");
+            }
         }
 
         public async Task RemoveAsync(string key)
         {
-            await _database.KeyDeleteAsync(key);
+            try
+            {
+                await _database.KeyDeleteAsync(key);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("RedisCache Sevice: RemoveAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("RedisCache Service: Problem with RemoveAsync");
+            }
         }
 
         public async Task SetAsync<T>(string key, T value, TimeSpan? exp)
         {
-            var json = JsonSerializer.Serialize(value);
-            await _database.StringSetAsync(key, json, exp ?? _time);
+            try
+            {
+                var json = JsonSerializer.Serialize(value);
+                await _database.StringSetAsync(key, json, exp ?? _time);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("RedisCache Sevice: SetAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("RedisCache Service: Problem with SetAsync");
+            }
         }
     }
 }

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using TaskFlow.Application.DTOs.TaskDTOs;
 using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Interfaces.Helpers;
 using TaskFlow.Application.Interfaces.Repositories;
@@ -20,15 +23,17 @@ namespace TaskFlow.Application.Services
         private readonly IHashHelper _hashHelper;
         private readonly IMapper _mapper;
         private readonly ITokenService _tokenService;
+        private readonly ICachingService _cacheService;
 
         public UserService(IUserRepository userRepository, IMapper mapper, IHashHelper hashHelper
-            , ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository)
+            , ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, ICachingService cacheService)
         {
             _userRepository = userRepository;
             _hashHelper = hashHelper;
             _mapper = mapper;
             _tokenService = tokenService;
             _refreshTokenRepository = refreshTokenRepository;
+            _cacheService = cacheService;
         }
 
         public Task<bool> CreateRecoveryTokenAsync(string email, CancellationToken cancellationToken)
@@ -41,6 +46,10 @@ namespace TaskFlow.Application.Services
             try
             {
                 UserEntity user = _mapper.Map<UserEntity>(userPostDto);
+                await _cacheService.RemoveAsync("Users");
+                await _cacheService.RemoveAsync($"Users:email:{user.Email.ToLower()}");
+                await _cacheService.RemoveAsync($"Users:id:{user.Id}");
+                await _cacheService.RemoveAsync($"Users:name:{user.UserName}");
                 user.Email = user.Email.Trim();
                 return await _userRepository.AddUserAsync(user, userPostDto.Password, cancellationToken);
             }
@@ -58,6 +67,14 @@ namespace TaskFlow.Application.Services
         {
             try
             {
+                var user = await _userRepository.GetUserByIdAsync(id, cancellationToken);
+
+                if (user == null)
+                    return null;
+                await _cacheService.RemoveAsync("Users");
+                await _cacheService.RemoveAsync($"Users:email:{user.Email.ToLower()}");
+                await _cacheService.RemoveAsync($"Users:id:{user.Id}");
+                await _cacheService.RemoveAsync($"Users:name:{user.UserName}");
                 return await _userRepository.DeleteUserByIdAsync(id, cancellationToken);
             }
             catch (OperationCanceledException oex)
@@ -74,8 +91,14 @@ namespace TaskFlow.Application.Services
         {
             try
             {
-                ICollection<UserEntity> users = await _userRepository.GetAllUsersAsync(cancellationToken);
-                return _mapper.Map<ICollection<UserGetDto>>(users);
+                var cache = await _cacheService.GetAsync<ICollection<UserGetDto>>("Users");
+                if (cache == null)
+                {
+                    ICollection<UserEntity> users = await _userRepository.GetAllUsersAsync(cancellationToken);
+                    cache = _mapper.Map<ICollection<UserGetDto>>(users);
+                    await _cacheService.SetAsync("Users", cache, null);
+                }
+                return cache;
             }
             catch (OperationCanceledException oex)
             {
@@ -91,8 +114,14 @@ namespace TaskFlow.Application.Services
         {
             try
             {
-                UserEntity user = await _userRepository.GetUserByEmailAsync(email, cancellationToken);
-                return _mapper.Map<UserGetDto>(user);
+                var cache = await _cacheService.GetAsync<UserGetDto>($"Users:email:{email.ToLower()}");
+                if (cache == null)
+                {
+                    UserEntity user = await _userRepository.GetUserByEmailAsync(email, cancellationToken);
+                    cache = _mapper.Map<UserGetDto>(user);
+                    await _cacheService.SetAsync($"Users:email:{email.ToLower()}", cache, null);
+                }
+                return cache;
             }
             catch (OperationCanceledException oex)
             {
@@ -108,8 +137,14 @@ namespace TaskFlow.Application.Services
         {
             try
             {
-                UserEntity user = await _userRepository.GetUserByIdAsync(id, cancellationToken);
-                return _mapper.Map<UserGetDto>(user);
+                var cache = await _cacheService.GetAsync<UserGetDto>($"Users:id:{id}");
+                if (cache == null)
+                {
+                    UserEntity user = await _userRepository.GetUserByIdAsync(id, cancellationToken);
+                    cache = _mapper.Map<UserGetDto>(user);
+                    await _cacheService.SetAsync($"Users:id:{id}", cache, null);
+                }
+                return cache;
             }
             catch (OperationCanceledException oex)
             {
@@ -125,8 +160,14 @@ namespace TaskFlow.Application.Services
         {
             try
             {
-                ICollection<UserEntity> users = await _userRepository.GetUsersByNameAsync(name, cancellationToken);
-                return _mapper.Map<ICollection<UserGetDto>>(users);
+                var cache = await _cacheService.GetAsync<ICollection<UserGetDto>>($"Users:name:{name}");
+                if (cache == null)
+                {
+                    ICollection<UserEntity> users = await _userRepository.GetUsersByNameAsync(name, cancellationToken);
+                    cache = _mapper.Map<ICollection<UserGetDto>>(users);
+                    await _cacheService.SetAsync($"Users:name:{name}", cache, null);
+                }
+                return cache;
             }
             catch (OperationCanceledException oex)
             {
@@ -142,8 +183,14 @@ namespace TaskFlow.Application.Services
         {
             try
             {
-                ICollection<UserEntity> users = await _userRepository.GetUsersByNamePaginationAsync(name, count, side, cancellationToken);
-                return _mapper.Map<ICollection<UserGetDto>>(users);
+                var cache = await _cacheService.GetAsync<ICollection<UserGetDto>>($"Users:name:pagination:{name}:{count}:{side}");
+                if (cache == null)
+                {
+                    ICollection<UserEntity> users = await _userRepository.GetUsersByNamePaginationAsync(name, count, side, cancellationToken);
+                    cache = _mapper.Map<ICollection<UserGetDto>>(users);
+                    await _cacheService.SetAsync($"Users:name:pagination:{name}:{count}:{side}", cache, null);
+                }
+                return cache;
             }
             catch (OperationCanceledException oex)
             {
@@ -159,8 +206,14 @@ namespace TaskFlow.Application.Services
         {
             try
             {
-                ICollection<UserEntity> users = await _userRepository.GetUsersPaginationAsync(count, side, cancellationToken);
-                return _mapper.Map<ICollection<UserGetDto>>(users);
+                var cache = await _cacheService.GetAsync<ICollection<UserGetDto>>($"Users:pagination:{count}:{side}");
+                if (cache == null)
+                {
+                    ICollection<UserEntity> users = await _userRepository.GetUsersPaginationAsync(count, side, cancellationToken);
+                    cache = _mapper.Map<ICollection<UserGetDto>>(users);
+                    await _cacheService.SetAsync($"Users:pagination:{count}:{side}", cache, null);
+                }
+                return cache;
             }
             catch (OperationCanceledException oex)
             {
@@ -249,6 +302,10 @@ namespace TaskFlow.Application.Services
             {
                 UserEntity newUser = _mapper.Map<UserEntity>(userUpdateDto);
                 UserEntity user = await _userRepository.UpdateAsync(newUser, cancellationToken);
+                await _cacheService.RemoveAsync("Users");
+                await _cacheService.RemoveAsync($"Users:email:{user.Email.ToLower()}");
+                await _cacheService.RemoveAsync($"Users:id:{user.Id}");
+                await _cacheService.RemoveAsync($"Users:name:{user.UserName}");
                 return _mapper.Map<UserGetDto>(user);
                  
             }
@@ -266,12 +323,16 @@ namespace TaskFlow.Application.Services
         {
             try
             {
-                if(userId != userUpdateDto.Id)
+                if (userId != userUpdateDto.Id)
                 {
                     throw new Exception();
                 }
                 UserEntity newUser = _mapper.Map<UserEntity>(userUpdateDto);
                 UserEntity user = await _userRepository.UpdateAsync(newUser, cancellationToken);
+                await _cacheService.RemoveAsync("Users");
+                await _cacheService.RemoveAsync($"Users:email:{user.Email.ToLower()}");
+                await _cacheService.RemoveAsync($"Users:id:{user.Id}");
+                await _cacheService.RemoveAsync($"Users:name:{user.UserName}");
                 return _mapper.Map<UserGetDto>(user);
 
             }
