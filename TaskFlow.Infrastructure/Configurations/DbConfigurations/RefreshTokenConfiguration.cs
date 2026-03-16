@@ -13,28 +13,24 @@ namespace TaskFlow.Infrastructure.Configurations.DbConfigurations
     {
         public void Configure(EntityTypeBuilder<RefreshTokenEntity> builder)
         {
-            builder.HasKey(r => r.Id);
+            builder.HasKey(x => x.Id);
 
-            builder
-                .HasOne(r => r.User)
-                .WithMany(u => u.RefreshTokens)
-                .HasForeignKey(r => r.UserId)
+            builder.Property(x => x.Token)
+                .IsRequired();
+
+            builder.Property(x => x.Expires)
+                .IsRequired();
+
+            builder.Property(x => x.CreatedAt)
+                .IsRequired();
+
+            builder.Property(x => x.IsRevoked)
+                .IsRequired();
+
+            builder.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Property(r => r.Token)
-                   .IsRequired()
-                   .HasMaxLength(200);
-
-            builder.Property(r => r.Expires)
-                   .IsRequired();
-
-            builder.Property(r => r.IsRevoked)
-                   .IsRequired()
-                   .HasDefaultValue(false);
-
-            builder.Property(r => r.CreatedAt)
-                   .IsRequired()
-                   .HasDefaultValueSql("CURRENT_TIMESTAMP");
         }
     }
 }

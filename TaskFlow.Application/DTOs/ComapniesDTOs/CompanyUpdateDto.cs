@@ -10,7 +10,7 @@ namespace TaskFlow.Application.DTOs.ComapniesDTOs
     /// Used to retrieve information about company name or description updates.
     /// Fields that do not need to be changed are specified as null.
     /// </summary>
-    public class CopmanyUpdateDto
+    public class CompanyUpdateDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

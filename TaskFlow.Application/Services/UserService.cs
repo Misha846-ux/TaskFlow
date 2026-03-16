@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+<<<<<<< HEAD
 using System.Security.AccessControl;
+=======
+using System.Security.Cryptography;
+>>>>>>> origin/master
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -19,26 +23,57 @@ namespace TaskFlow.Application.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IHashHelper _hashHelper;
         private readonly IMapper _mapper;
+<<<<<<< HEAD
         private readonly ITokenService _tokenService;
         private readonly ICachingService _cacheService;
 
         public UserService(IUserRepository userRepository, IMapper mapper, IHashHelper hashHelper
             , ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, ICachingService cacheService)
+=======
+        private readonly IJwtService _tokenService;
+
+        public UserService(IUserRepository userRepository, IMapper mapper, IHashHelper hashHelper
+            , IJwtService tokenService)
+>>>>>>> origin/master
         {
             _userRepository = userRepository;
             _hashHelper = hashHelper;
             _mapper = mapper;
             _tokenService = tokenService;
+<<<<<<< HEAD
             _refreshTokenRepository = refreshTokenRepository;
             _cacheService = cacheService;
+=======
+>>>>>>> origin/master
         }
 
-        public Task<bool> CreateRecoveryTokenAsync(string email, CancellationToken cancellationToken)
+        public async Task<string> CreateRecoveryTokenAsync(string email, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                UserEntity user = await _userRepository.GetUserByEmailAsync(email, cancellationToken);
+                if (user == null)
+                {
+                    throw new Exception();
+                }
+                
+                string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
+                user.RecoveryTokenHash = _hashHelper.Hash(token);
+                user.RecoveryTokenLifeTime = DateTime.UtcNow.AddMinutes(5);
+                await _userRepository.SaveChages(cancellationToken);
+
+                return token;
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Sevice: CreateRecoveryTokenAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Service: Problem with CreateRecoveryTokenAsync");
+            }
         }
 
         public async Task<int?> CreateUserAsync(UserPostDto userPostDto, CancellationToken cancellationToken)
@@ -239,8 +274,7 @@ namespace TaskFlow.Application.Services
                     throw new UnauthorizedAccessException();
                 }
 
-                Console.WriteLine("Метод LoginWithPasswordAsync не закончен");
-                throw new Exception();
+                return await _tokenService.GenerateRefreshTokenAsync(user.Id);
             }
             catch (UnauthorizedAccessException uex)
             {
@@ -265,7 +299,7 @@ namespace TaskFlow.Application.Services
                 {
                     throw new UnauthorizedAccessException();
                 }
-                else if (user.RecoveryTokenLifeTime == DateTime.Now)
+                else if (user.RecoveryTokenLifeTime >= DateTime.Now)
                 {
                     throw new UnauthorizedAccessException();
                 }
@@ -274,8 +308,10 @@ namespace TaskFlow.Application.Services
                     throw new UnauthorizedAccessException();
                 }
 
-                Console.WriteLine("Метод LoginWithRecoveryTokenAsync не закончен");
-                throw new Exception();
+                user.RecoveryTokenHash = null;
+                user.RecoveryTokenLifeTime = null;
+
+                return await _tokenService.GenerateRefreshTokenAsync(user.Id);
             }
             catch (UnauthorizedAccessException uex)
             {
@@ -291,9 +327,30 @@ namespace TaskFlow.Application.Services
             }
         }
 
-        public Task<string> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
+        public async Task<string> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                RefreshTokenEntity token = await _tokenService.GetRefreshTokenAsync(refreshToken);
+                if(token == null)
+                {
+                    throw new Exception("Token not found");
+                }
+                else if(token.Expires >= DateTime.Now)
+                {
+                    throw new Exception("The token's lifetime has expired");
+                }
+                UserEntity user = await _userRepository.GetUserByIdAsync(token.UserId.Value, cancellationToken);
+                return _tokenService.GenerateAccessToken(user);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Sevice: LoginWithRecoveryTokenAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Service: Problem with LoginWithRecoveryTokenAsync");
+            }
         }
 
         public async Task<UserGetDto> UpdateUserForAdminAsync(UserUpdateDto userUpdateDto, CancellationToken cancellationToken)

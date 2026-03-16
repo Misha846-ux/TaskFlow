@@ -27,4 +27,6 @@ public interface ICompanyRepository
     Task<CompanyEntity> UpdateCompanyAsync(CompanyEntity newCompany, CancellationToken cancellationToken);
     Task<CompanyUserEntity> UpdateCompanyUserAsync(CompanyUserEntity newCompanyUser, CancellationToken cancellationToken);
 
+    
+
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.DTOs.UserDTOs;
+using TaskFlow.Application.Interfaces.Services;
 using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Api.Controllers
@@ -8,13 +9,14 @@ namespace TaskFlow.Api.Controllers
     [ApiController]
     [Route("[controller]")]
     [Authorize]
-    public class UserController : ControllerBase
+    public class UserController(IUserService _userService): ControllerBase
     {
         //========================================Get=============================================
         [HttpGet]
-        public Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            return null;
+            ICollection<UserGetDto> users = await _userService.GetAllUsersAsync(cancellationToken);
+            return Ok(users);
         }
 
         /// <summary>
@@ -24,9 +26,10 @@ namespace TaskFlow.Api.Controllers
         /// <param name="side">Номер порции данных</param>
         /// <returns></returns>
         [HttpGet("Filtred")]
-        public Task<IActionResult> GetPagination([FromQuery] int count, int side)
+        public async Task<IActionResult> GetPagination([FromQuery] int count, int side, CancellationToken cancellationToken)
         {
-            return null;
+            ICollection<UserGetDto> users = await _userService.GetUsersPagitationAsync(count, side, cancellationToken);
+            return Ok(users);
         }
 
         /// <summary>
@@ -37,9 +40,10 @@ namespace TaskFlow.Api.Controllers
         /// <param name="name">Буквосочетание которое должно присутствовать в имени</param>
         /// <returns></returns>
         [HttpGet("Filtred/SearchByName")]
-        public Task<IActionResult> GetByNamePagination([FromQuery] int count, int side, string name)
+        public async Task<IActionResult> GetByNamePagination([FromQuery] int count, int side, string name, CancellationToken cancellationToken)
         {
-            return null;
+            ICollection<UserGetDto> users = await _userService.GetUsersByNamePagitationAsync(name, count, side, cancellationToken);
+            return Ok(users);
         }
 
         /// <summary>
@@ -48,21 +52,24 @@ namespace TaskFlow.Api.Controllers
         /// <param name="name">Буквосочетание которое должно присутствовать в имени</param>
         /// <returns></returns>
         [HttpGet("SearchByName{name}")]
-        public Task<IActionResult> GetByName([FromRoute] string name)
+        public async Task<IActionResult> GetByName([FromRoute] string name, CancellationToken cancellationToken)
         {
-            return null;
+            ICollection<UserGetDto> users = await _userService.GetUsersByNameAsync(name, cancellationToken);
+            return Ok(users);
         }
 
         [HttpGet("ById{id}")]
-        public Task<IActionResult> GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken cancellationToken)
         {
-            return null;
+            UserGetDto user = await _userService.GetUserByIdAsync(id, cancellationToken);
+            return Ok(user);
         }
 
         [HttpGet("ByEmail{rout}")]
-        public Task<IActionResult> GetByEmail([FromRoute] string rout)
+        public async Task<IActionResult> GetByEmail([FromRoute] string email, CancellationToken cancellationToken)
         {
-            return null;
+            UserGetDto user = await _userService.GetUserByEmailAsync(email, cancellationToken);
+            return Ok(user);
         }
 
 
@@ -76,9 +83,10 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [HttpDelete("DeleteForAdmin{id}")]
         [Authorize(Roles = "Admin")]
-        public Task<IActionResult> DeleteForAdmin([FromRoute] int id)
+        public async Task<IActionResult> DeleteForAdmin([FromRoute] int id, CancellationToken cancellationToken)
         {
-            return null;
+            int? deletedId = await _userService.DeleteUserByIdAsync(id, cancellationToken);
+            return Ok(deletedId);
         }
 
         /// <summary>
@@ -86,8 +94,9 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("Delete")]
-        public Task<IActionResult> Delete()
+        public Task<IActionResult> Delete(CancellationToken cancellationToken)
         {
+            Console.WriteLine("User Controller: Delete for user. Не закончен нет необходимых методов");
             return null;
         }
 
@@ -102,9 +111,10 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [HttpPut("UpdateForAdmin")]
         [Authorize(Roles = "Admin")]
-        public Task<IActionResult> UpdateForAdmin([FromBody] UserUpdateDto newUser)
+        public async Task<IActionResult> UpdateForAdmin([FromBody] UserUpdateDto newUser, CancellationToken cancellationToken)
         {
-            return null;
+            UserGetDto user = await _userService.UpdateUserForAdminAsync(newUser, cancellationToken);
+            return Ok(user);
         }
 
         /// <summary>
@@ -116,8 +126,9 @@ namespace TaskFlow.Api.Controllers
         /// Поля значение которых будет null изменению не подвергнутся и будут сохранены</param>
         /// <returns></returns>
         [HttpPut("Update")]
-        public Task<IActionResult> Update([FromBody] UserUpdateDto newUser)
+        public Task<IActionResult> Update([FromBody] UserUpdateDto newUser, CancellationToken cancellationToken)
         {
+            Console.WriteLine("User Controller: Update for user. Не закончен нет необходимых методов");
             return null;
         }
     }

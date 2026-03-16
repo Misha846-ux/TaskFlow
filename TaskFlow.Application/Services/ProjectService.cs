@@ -201,7 +201,8 @@ namespace TaskFlow.Application.Services
                 if (!userProjects.Any(x => x.Id == projectId))
                     return new List<ProjectUserListItemDto>();
 
-                var users = await _repository.GetAllProjectUsersAsync(projectId, cancellationToken);
+            var users = await _repository.GetAllUserProjectsAsync(projectId, cancellationToken);
+
 
                 cache = _mapper.Map<ICollection<ProjectUserListItemDto>>(users);
                 await _cacheService.SetAsync($"Projects:user:{projectId}:{userId}", cache, null);
@@ -211,10 +212,12 @@ namespace TaskFlow.Application.Services
 
         public async Task<ICollection<ProjectUserListItemDto>> GetProjectUsersAdminAsync(int projectId, CancellationToken cancellationToken)
         {
+
             var cache = await _cacheService.GetAsync<ICollection<ProjectUserListItemDto>>($"Projects:admin:{projectId}");
             if (cache == null)
             {
-                var users = await _repository.GetAllProjectUsersAsync(projectId, cancellationToken);
+               
+            var users = await _repository.GetAllUserProjectsAsync(projectId, cancellationToken);
 
                 cache = _mapper.Map<ICollection<ProjectUserListItemDto>>(users);
                 await _cacheService.SetAsync($"Projects:admin:{projectId}", cache, null);

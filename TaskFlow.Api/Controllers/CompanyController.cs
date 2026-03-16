@@ -71,7 +71,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         /// <summary>
-        /// Позволет пользователю получить информацию о компании к которой он пренадлежит.
+        /// Позволет пользователю получить информацию о компании к которой он пренадлежит. Информацию о пользователе берём из Access или Refresh токена
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -128,7 +128,7 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [HttpPut("UpdateForAdmin")]
         [Authorize(Roles = "Admin")]
-        public Task<IActionResult> UpdateForAdmin([FromBody] CopmanyUpdateDto company)
+        public Task<IActionResult> UpdateForAdmin([FromBody] CompanyUpdateDto company)
         {
             return null;
         }
@@ -141,7 +141,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="copmany"></param>
         /// <returns></returns>
         [HttpPut("Update")]
-        public Task<IActionResult> Update([FromBody] CopmanyUpdateDto copmany)
+        public Task<IActionResult> Update([FromBody] CompanyUpdateDto copmany)
         {
             return null;
         }
