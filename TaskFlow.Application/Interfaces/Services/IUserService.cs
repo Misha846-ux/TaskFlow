@@ -48,7 +48,7 @@ namespace TaskFlow.Application.Interfaces.Services
         /// <param name="email">User email</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<bool> CreateRecoveryTokenAsync(string email, CancellationToken cancellationToken);
+        Task<string> CreateRecoveryTokenAsync(string email, CancellationToken cancellationToken);
 
     }
 }
