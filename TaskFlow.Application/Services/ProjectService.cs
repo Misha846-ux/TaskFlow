@@ -167,14 +167,14 @@ namespace TaskFlow.Application.Services
             if (!userProjects.Any(x => x.Id == projectId))
                 return new List<ProjectUserListItemDto>();
 
-            var users = await _repository.GetAllProjectUsersAsync(projectId, cancellationToken);
+            var users = await _repository.GetAllUserProjectsAsync(projectId, cancellationToken);
 
             return _mapper.Map<ICollection<ProjectUserListItemDto>>(users);
         }
 
         public async Task<ICollection<ProjectUserListItemDto>> GetProjectUsersAdminAsync(int projectId, CancellationToken cancellationToken)
         {
-            var users = await _repository.GetAllProjectUsersAsync(projectId, cancellationToken);
+            var users = await _repository.GetAllUserProjectsAsync(projectId, cancellationToken);
 
             return _mapper.Map<ICollection<ProjectUserListItemDto>>(users);
         }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Application.DTOs.AuthDTOs;
 using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Interfaces.Services;
 

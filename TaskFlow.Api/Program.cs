@@ -1,15 +1,12 @@
-
 using StackExchange.Redis;
 using TaskFlow.Application.Interfaces.Helpers;
 using TaskFlow.Application.Interfaces.Repositories;
 using TaskFlow.Application.Interfaces.Services;
 using TaskFlow.Infrastructure.Repositories;
 using TaskFlow.Infrastructure.Services;
-
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TaskFlow.Application.Interfaces.Services;
-using TaskFlow.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace TaskFlow.Api
 {
@@ -19,8 +16,10 @@ namespace TaskFlow.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddAuthentication("Bearer")
-            .AddJwtBearer("Bearer", options =>
+            var key = builder.Configuration["Jwt:Key"];
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -32,11 +31,12 @@ namespace TaskFlow.Api
                     ValidIssuer = builder.Configuration["Jwt:Issuer"],
                     ValidAudience = builder.Configuration["Jwt:Audience"],
 
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(key))
                 };
             });
 
-            builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IJwtService, JwtService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
