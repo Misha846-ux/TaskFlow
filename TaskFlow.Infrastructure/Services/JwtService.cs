@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -9,96 +10,93 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using TaskFlow.Application.Interfaces.Repositories;
 using TaskFlow.Application.Interfaces.Services;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Infrastructure.Configurations;
 using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Services
 {
     public class JwtService : IJwtService
     {
-        private readonly IConfiguration _configuration;
-        private readonly TaskFlowDbContext _context;
+        private readonly JwtSettings _jwtSettings;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-        public JwtService(
-            IConfiguration configuration,
-            TaskFlowDbContext context)
+        public JwtService(IOptions<JwtSettings> jwtSettings, IRefreshTokenRepository refreshTokenRepository)
         {
-            _configuration = configuration;
-            _context = context;
+            _jwtSettings = jwtSettings.Value;
+            _refreshTokenRepository = refreshTokenRepository;
         }
 
         public string GenerateAccessToken(UserEntity user)
         {
-            var key = _configuration["Jwt:Key"];
-            var issuer = _configuration["Jwt:Issuer"];
-            var audience = _configuration["Jwt:Audience"];
-            var expirationMinutes = int.Parse(_configuration["Jwt:ExpirationInMinutes"]);
-
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email)
             };
 
-            var securityKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(key));
-
-            var credentials = new SigningCredentials(
-                securityKey,
-                SecurityAlgorithms.HmacSha256);
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer,
-                audience,
+                _jwtSettings.Issuer,
+                _jwtSettings.Audience,
                 claims,
-                expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
-                signingCredentials: credentials);
-
+                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
+                signingCredentials: credentials
+            );
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         public async Task<RefreshTokenEntity> GenerateRefreshTokenAsync(int userId)
         {
-            var expirationDays = int.Parse(
-                _configuration["Jwt:RefreshTokenExpirationDays"]);
-
-            var token = Convert.ToBase64String(
-                RandomNumberGenerator.GetBytes(64));
-
+            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
             var refreshToken = new RefreshTokenEntity
             {
                 Token = token,
                 UserId = userId,
-                Expires = DateTime.UtcNow.AddDays(expirationDays),
+                Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
                 CreatedAt = DateTime.UtcNow,
                 IsRevoked = false
             };
-
-            _context.RefreshTokens.Add(refreshToken);
-
-            await _context.SaveChangesAsync();
-
-            return refreshToken;
+            return await _refreshTokenRepository.AddAsync(refreshToken);
         }
 
         public async Task<RefreshTokenEntity?> GetRefreshTokenAsync(string token)
         {
-            return await _context.RefreshTokens
-                .FirstOrDefaultAsync(x => x.Token == token);
+            return await _refreshTokenRepository.GetByTokenAsync(token);
         }
 
         public async Task RevokeRefreshTokenAsync(string token)
         {
-            var refreshToken = await _context.RefreshTokens
-                .FirstOrDefaultAsync(x => x.Token == token);
+            await _refreshTokenRepository.RevokeAsync(token);
+        }
 
-            if (refreshToken == null)
-                return;
-
-            refreshToken.IsRevoked = true;
-
-            await _context.SaveChangesAsync();
+        public ClaimsPrincipal? DecodeToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_jwtSettings.Key);
+            try
+            {
+                var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = _jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = _jwtSettings.Audience,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

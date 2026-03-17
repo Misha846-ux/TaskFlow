@@ -14,5 +14,6 @@ namespace TaskFlow.Application.Interfaces.Services
         Task<RefreshTokenEntity> GenerateRefreshTokenAsync(int userId);
         Task<RefreshTokenEntity?> GetRefreshTokenAsync(string token);
         Task RevokeRefreshTokenAsync(string token);
+        ClaimsPrincipal? DecodeToken(string token);
     }
 }
