@@ -65,10 +65,10 @@ public interface ICompanyService
     /// <summary>
     /// Обновляет данные компании (для Admin — без проверки прав).
     /// </summary>
-    Task<int?> UpdateCompanyByIdAsync(int id, CompanyUpdateDto dto, CancellationToken cancellationToken);
+    Task<int?> UpdateCompanyByIdAsync(CompanyUpdateDto dto, CancellationToken cancellationToken);
 
     /// <summary>
     /// Обновляет данные компании (только для пользователей, имеющих право в этой компании).
     /// </summary>
-    Task UpdateUsersCompanyByIdAsync(int id, CompanyUpdateDto dto, int userId, CancellationToken cancellationToken);
+    Task UpdateUsersCompanyByIdAsync(CompanyOfUserUpdateDto companyDto, CancellationToken cancellationToken);
 }

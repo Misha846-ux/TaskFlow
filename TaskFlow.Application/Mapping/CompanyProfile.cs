@@ -26,5 +26,7 @@ public class CompanyProfile : Profile
         CreateMap<CompanyPostDto, CompanyEntity>();
 
         CreateMap<CompanyUpdateDto, CompanyEntity>();
+
+        CreateMap<CompanyOfUserUpdateDto, CompanyUserEntity>();
     }
 }

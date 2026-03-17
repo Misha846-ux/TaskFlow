@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +18,13 @@ public class CompanyService : ICompanyService
     private readonly ICompanyRepository _companyRepository;
     private readonly IMapper _mapper;
     private readonly ICachingService _cachingService;
-    public CompanyService(ICompanyRepository companyRepository, IMapper mapper, ICachingService cachingService)
+    private readonly ILogger<CompanyService> _logger;
+    public CompanyService(ICompanyRepository companyRepository, IMapper mapper, ICachingService cachingService, ILogger<CompanyService> logger)
     {
         _companyRepository = companyRepository;
         _mapper = mapper;
         _cachingService = cachingService;
+        _logger = logger;
     }
     public async Task<int?> CreateCompanyAsync(CompanyPostDto dto, int ownerUserId, CancellationToken cancellationToken)
     {
@@ -205,14 +208,33 @@ public class CompanyService : ICompanyService
         }
     }
 
-    public Task<int?> UpdateCompanyByIdAsync(int id, CompanyUpdateDto dto, CancellationToken cancellationToken)
+    public async Task<int?> UpdateCompanyByIdAsync(CompanyUpdateDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var company = _mapper.Map<CompanyEntity>(dto);
+            await _companyRepository.UpdateCompanyAsync(company, cancellationToken);
+            return company.Id;
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning("An error occurred while updating the company");
+            return null;
+        }
     }
 
-    public Task UpdateUsersCompanyByIdAsync(int id, CompanyUpdateDto dto, int userId, CancellationToken cancellationToken)
+    //Maybe still required to redo this method starting from the reppsitory and entities
+    public async Task UpdateUsersCompanyByIdAsync(CompanyOfUserUpdateDto companyDto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var company = _mapper.Map<CompanyUserEntity>(companyDto);
+            await _companyRepository.UpdateCompanyUserAsync(company, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("An error occurred while updating the user's company");
+        }
     }
 }
 
