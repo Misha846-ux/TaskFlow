@@ -1,29 +1,42 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Application.DTOs.AuthDTOs;
+﻿using Azure;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Interfaces.Services;
+using TaskFlow.Domain.Entities;
 
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AuthorizationController: ControllerBase
+    public class AuthorizationController(IUserService _userService): ControllerBase
     {
         [HttpPost("SingUp")]
-        public Task<IActionResult> CreateAccaunt([FromBody]UserPostDto user)
+        public async Task<IActionResult> CreateAccaunt([FromBody]UserPostDto user, CancellationToken cancellationToken)
         {
-            return null;
+            int? userId = await _userService.CreateUserAsync(user, cancellationToken);
+            return Created();
         }
 
         [HttpPost("LogIn")]
-        public Task<IActionResult> Login([FromBody]UserLoginDto user)
+        public async Task<IActionResult> Login([FromBody]UserLoginDto user, CancellationToken cancellationToken)
         {
-            return null;
+            RefreshTokenEntity token = await _userService.LoginWithPasswordAsync(user, cancellationToken);
+            Response.Cookies.Append("refreshToken", token.Token, new CookieOptions
+            {
+                HttpOnly = true,       
+                Secure = true,        
+                SameSite = SameSiteMode.Strict, 
+                Expires = token.Expires
+            });
+            return Ok();
         }
         [HttpPost("Refresh")]
-        public Task<IActionResult> RefreshAccessToken()
+        public async Task<IActionResult> RefreshAccessToken(CancellationToken cancellationToken)
         {
-            return null;
+            Request.Cookies.TryGetValue("refreshToken", out string Refreshtoken);
+            string accessToken = await _userService.RefreshAsync(Refreshtoken, cancellationToken);
+            return Ok(accessToken);
         }
 
         /// <summary>
@@ -32,9 +45,10 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPut("ForgotPassword/GetToken{email}")]
-        public Task<IActionResult> ForgotPassword([FromRoute] string email)
+        public async Task<IActionResult> ForgotPassword([FromRoute] string email, CancellationToken cancellationToken)
         {
-            return null;
+            string token = await _userService.CreateRecoveryTokenAsync(email, cancellationToken);
+            return Ok(token);
         }
 
         /// <summary>
@@ -43,9 +57,17 @@ namespace TaskFlow.Api.Controllers
         /// <param name="userLogin"></param>
         /// <returns></returns>
         [HttpPost("ForgotPassword/LoginWithToken")]
-        public Task<IActionResult> ForgotPasswordLogin([FromBody] UserLoginDto userLogin)
+        public async Task<IActionResult> ForgotPasswordLogin([FromBody] UserLoginDto userLogin, CancellationToken cancellationToken)
         {
-            return null;
+            RefreshTokenEntity token = await _userService.LoginWithRecoveryTokenAsync(userLogin, cancellationToken);
+            Response.Cookies.Append("refreshToken", token.Token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = token.Expires
+            });
+            return Ok();
         }
 
     }

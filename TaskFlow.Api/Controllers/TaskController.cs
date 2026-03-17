@@ -22,7 +22,7 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
         [HttpGet("admin/get")]
-        public async Task<IActionResult> GetAllTasks([FromQuery] int pagenum = 1, [FromQuery] int limit = 10, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllTasks(CancellationToken cancellationToken, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
         {
             var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
             var chunk = tasks
@@ -52,8 +52,8 @@ namespace TaskFlow.Api.Controllers
         /// <param name="limit"></param>
         /// <returns></returns>
         [Authorize]
-        [HttpGet("get/{name}")]
-        public async Task<IActionResult> GetTaskByName([FromRoute] string name, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10, CancellationToken cancellationToken)
+        [HttpGet("get")]
+        public async Task<IActionResult> GetTaskByName(CancellationToken cancellationToken, [FromQuery] string name, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
         {
             var tasks = await _taskService.GetTaskByNameAsync(name, 100, cancellationToken); // ВРЕМЕНННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА
             Console.WriteLine("ВРЕМЕННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА в методе GetTaskByName. Руслан поработаешь с этим");
@@ -85,7 +85,7 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.User))]
         [HttpGet("user/get")]
-        public async Task<IActionResult> GetAllUserTasks([FromQuery] int pagenum = 1, [FromQuery] int limit = 10, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllUserTasks(CancellationToken cancellationToken, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
         {
             var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
             var chunk = tasks

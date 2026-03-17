@@ -143,7 +143,7 @@ namespace TaskFlow.Infrastructure.Repositories
                 return await _context.Companies
                     .Include(c => c.Projects)
                     .Include(c => c.Users)
-                    .Where(c => c.CompanyUsers.Any(u => u.Id == userId))
+                    .Where(c => c.Users.Any(u => u.Id == userId))
                     .ToListAsync(cancellationToken);
             }
             catch (OperationCanceledException oex)

@@ -208,6 +208,22 @@ namespace TaskFlow.Infrastructure.Repositories
             }
         }
 
+        public async Task SaveChages(CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Repository: SaveChages operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Repository: Problem with SaveChages");
+            }
+        }
+
         public async Task<UserEntity> UpdateAsync(UserEntity newUser, CancellationToken cancellationToken)
         {
             try
