@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using TaskFlow.Domain.Enums.TaskEnums;
 
 namespace TaskFlow.Domain.Entities
@@ -12,7 +11,7 @@ namespace TaskFlow.Domain.Entities
     {
         public int Id { get; set; }
         [Required]
-        public TaskFlow.Domain.Enums.TaskEnums.TaskStatus? Status { get; set; }
+        public Enums.TaskEnums.TaskStatus? Status { get; set; }
         [Required]
         public string? TaskName { get; set; }
         public string? Description { get; set; }
@@ -24,7 +23,7 @@ namespace TaskFlow.Domain.Entities
         public DateTime? DeadLine { get; set; }
         [Required]
         public int? ProjectId { get; set; }
-        public int? UserId { get; set; }
+        public int? UserId { get; set; }    
         public ProjectEntity Project { get; set; }
         public UserEntity User { get; set; }
     }

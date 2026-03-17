@@ -16,24 +16,15 @@ public class CompanyProfile : Profile
         CreateMap<CompanyEntity, CompanyGetDto>()
            .ForMember(
                dest => dest.EmploeesId,
-               opt => opt.MapFrom(src => src.CompanyUsers.Select(u => u.UserId))
+               opt => opt.MapFrom(src => src.Users.Select(u => u.Id))
            )
            .ForMember(
                dest => dest.ProjectsId,
                opt => opt.MapFrom(src => src.Projects.Select(p => p.Id))
            );
 
-        CreateMap<CompanyPostDto, CompanyEntity>()
-            .ForMember(
-                dest => dest.CreatedAt,
-                opt => opt.MapFrom(src => DateTime.UtcNow)
-            )
-            .ForMember(dest => dest.Projects, opt => opt.Ignore())
-            .ForMember(dest => dest.CompanyUsers, opt => opt.Ignore());
+        CreateMap<CompanyPostDto, CompanyEntity>();
 
-        CreateMap<CompanyUpdateDto, CompanyEntity>()
-            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.Projects, opt => opt.Ignore())
-            .ForMember(dest => dest.CompanyUsers, opt => opt.Ignore());
+        CreateMap<CompanyUpdateDto, CompanyEntity>();
     }
 }

@@ -16,6 +16,6 @@ namespace TaskFlow.Domain.Entities
         [Required]
         public DateTime? CreatedAt { get; set; }
         public ICollection<ProjectEntity> Projects { get; set; }
-        public ICollection<CompanyUserEntity> CompanyUsers { get; set; }
+        public ICollection<CompanyUserEntity> Users { get; set; }
     }
 }

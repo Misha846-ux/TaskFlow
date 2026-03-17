@@ -103,7 +103,7 @@ namespace TaskFlow.Infrastructure.Repositories
             {
                 return await _context.Companies
                     .Include(c => c.Projects)
-                    .Include(c => c.CompanyUsers)
+                    .Include(c => c.Users)
                     .ToListAsync(cancellationToken);
             }
             catch (OperationCanceledException oex)
@@ -142,7 +142,7 @@ namespace TaskFlow.Infrastructure.Repositories
             {
                 return await _context.Companies
                     .Include(c => c.Projects)
-                    .Include(c => c.CompanyUsers)
+                    .Include(c => c.Users)
                     .Where(c => c.CompanyUsers.Any(u => u.Id == userId))
                     .ToListAsync(cancellationToken);
             }
@@ -166,11 +166,11 @@ namespace TaskFlow.Infrastructure.Repositories
                 }
                 return await _context.Companies
                     .Include(c => c.Projects)
-                    .Include(c => c.CompanyUsers)
+                    .Include(c => c.Users)
                     .OrderBy(c => c.Id)
                     .Skip((side - 1) * count)
                     .Take(count)
-                    .Where (c => c.CompanyUsers.Any(u => u.Id == userId))
+                    .Where (c => c.Users.Any(u => u.Id == userId))
                     .ToListAsync(cancellationToken);
             }
             catch (OperationCanceledException oex)
@@ -193,7 +193,7 @@ namespace TaskFlow.Infrastructure.Repositories
                 }
                 return await _context.Companies
                     .Include(c => c.Projects)
-                    .Include(c => c.CompanyUsers)
+                    .Include(c => c.Users)
                     .OrderBy(c => c.Id)
                     .Skip((side - 1) * count)
                     .Take(count)
@@ -215,7 +215,7 @@ namespace TaskFlow.Infrastructure.Repositories
             {
                 return await _context.Companies
                     .Include(c => c.Projects)
-                    .Include(c => c.CompanyUsers)
+                    .Include(c => c.Users)
                     .SingleOrDefaultAsync(c => c.Id == id, cancellationToken);
             }
             catch (OperationCanceledException oex)
