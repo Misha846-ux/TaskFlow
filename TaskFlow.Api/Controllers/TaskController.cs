@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TaskFlow.Application.DTOs.TaskDto;
 using TaskFlow.Application.DTOs.TaskDTOs;
+using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Interfaces.Services;
+using TaskFlow.Application.Services;
 using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Api.Controllers
@@ -21,7 +23,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="limit"></param>
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
-        [HttpGet("admin/get")]
+        [HttpGet("admin/GetAll")]
         public async Task<IActionResult> GetAllTasks(CancellationToken cancellationToken, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
         {
             var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
@@ -30,14 +32,53 @@ namespace TaskFlow.Api.Controllers
                 .Take(limit);
             return Ok(chunk);
         }
-
+        /// <summary>
+        /// Allow get datas by pagination
+        /// </summary>
+        /// <param name="count">Amount of tasks in one datas portion</param>
+        /// <param name="side">Number of data's portion</param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("Filtred")]
+        public async Task<IActionResult> GetPagination([FromQuery] int count, int side, CancellationToken cancellationToken)
+        {
+            ICollection<TaskGetDto> tasks = await _taskService.GetTasksPaginationAsync(count, side, cancellationToken);
+            return Ok(tasks);
+        }
+        /// <summary>
+        /// Allow get datas by pagination
+        /// </summary>
+        /// <param name="projectId">roject id for more corect portion</param>
+        /// <param name="count">Amount of tasks in one datas portion</param>
+        /// <param name="side">Number of data's portion</param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("FiltredWithProjectId")]
+        public async Task<IActionResult> GetExtraPagination(int projectId,[FromQuery] int count, int side, CancellationToken cancellationToken)
+        {
+            ICollection<TaskGetDto> tasks = await _taskService.GetProjectTasksPaginationAsync(projectId,count, side, cancellationToken);
+            return Ok(tasks);
+        }
+        /// <summary>
+        /// Allow get data's name by pagination and name read in letters
+        /// </summary>
+        /// <param name="count">Allow get datas by pagination</param>
+        /// <param name="side">Number of data's portion</param>
+        /// <param name="name">Letter's reader which has to be in name</param>
+        /// <returns></returns>
+        [HttpGet("Filtred/SearchByName")]
+        public async Task<IActionResult> GetByNamePagination([FromQuery] int count, int side, string name, int projectId, CancellationToken cancellationToken)
+        {
+            ICollection<TaskGetDto> tasks = await _taskService.GetTasksByNamePaginationAsync(name, projectId,count, side, cancellationToken);
+            return Ok(tasks);
+        }
         /// <summary>
         /// Method for getting Tasks by id, uses for admin
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
-        [HttpGet("admin/get/{id}")]
+        [HttpGet("admin/GetById/{id}")]
         public async Task<IActionResult> GetTaskById([FromRoute] int id, CancellationToken cancellationToken)
         {
             var task = await _taskService.GetTaskByIdAsync(id, cancellationToken);
@@ -52,15 +93,11 @@ namespace TaskFlow.Api.Controllers
         /// <param name="limit"></param>
         /// <returns></returns>
         [Authorize]
-        [HttpGet("get")]
-        public async Task<IActionResult> GetTaskByName(CancellationToken cancellationToken, [FromQuery] string name, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
+        [HttpGet("GetByName/{name}")]
+        public async Task<IActionResult> GetTaskByName(CancellationToken cancellationToken, [FromRoute] string name, [FromQuery] int projectId)
         {
-            var tasks = await _taskService.GetTaskByNameAsync(name, 100, cancellationToken); // ВРЕМЕНННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА
-            Console.WriteLine("ВРЕМЕННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА в методе GetTaskByName. Руслан поработаешь с этим");
-            var chunk = tasks
-            .Skip((pagenum - 1) * limit)
-                .Take(limit);
-            return Ok(chunk);
+            var tasks = await _taskService.GetTaskByNameAsync(name, projectId, cancellationToken);
+            return Ok(tasks);
         }
 
         /// <summary>
@@ -69,14 +106,19 @@ namespace TaskFlow.Api.Controllers
         /// <param name="date"></param>
         /// <returns></returns>
         [Authorize]
-        [HttpGet("get/{date}")]
-        public async Task<IActionResult> GetTaskByDeadLine([FromRoute] DateTime date, CancellationToken cancellationToken)
+        [HttpGet("GetByDate/{date}")]
+        public async Task<IActionResult> GetTaskByDeadLine([FromQuery] int projectId, [FromRoute] DateTime date, CancellationToken cancellationToken)
         {
-            var task = await _taskService.GetTaskByDeadLineAsync(date, 100, cancellationToken); //ВРЕМЕННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА
-            Console.WriteLine("ВРЕМЕННОЕ ЗНАЧЕНИЕ ПОТОМ ЗАМЕНИТЬ НА ИД ПРОЕКТА в методе GetTaskByDeadLine. Руслан поработаешь с этим");
+            var task = await _taskService.GetTaskByDeadLineAsync(date, projectId, cancellationToken); 
             return Ok(task);
         }
-
+        [Authorize]
+        [HttpGet("GetByStatus/{status}")]
+        public async Task<IActionResult> GetTaskByStatus([FromRoute] TaskFlow.Domain.Enums.TaskEnums.TaskStatus status, [FromQuery] int projectId, CancellationToken cancellationToken)
+        {
+            var task = await _taskService.GetTaskByStatusAsync(status, projectId, cancellationToken);
+            return Ok(task);
+        }
         /// <summary>
         /// Method for getting all Tasks, uses for user
         /// </summary>
@@ -84,7 +126,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="limit"></param>
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.User))]
-        [HttpGet("user/get")]
+        [HttpGet("user/GetAll")]
         public async Task<IActionResult> GetAllUserTasks(CancellationToken cancellationToken, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
         {
             var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
@@ -100,7 +142,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.User))]
-        [HttpGet("user/get/{id}")]
+        [HttpGet("user/GetById/{id}")]
         public async Task<IActionResult> GetUserTaskById([FromRoute] int id, CancellationToken cancellationToken)
         {
             var task = await _taskService.GetTaskByIdAsync(id, cancellationToken);
@@ -115,7 +157,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="dto"></param>
         /// <returns></returns>
         [Authorize]
-        [HttpPost("post")]
+        [HttpPost("AddTask")]
         public async Task<IActionResult> AddTask([FromBody] TaskPostDto dto, CancellationToken cancellationToken)
         {
             int? id = await _taskService.CreateTaskAsync(dto, cancellationToken);
@@ -138,7 +180,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="dto"></param>
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
-        [HttpPut("admin/update/{id}")]
+        [HttpPut("admin/UpdateById/{id}")]
         public async Task<IActionResult> UpdateTask(int id, TaskUpdateDto dto, CancellationToken cancellationToken)
         {
             var result = await _taskService.UpdeteTaskAsync(id, dto, cancellationToken);
@@ -156,7 +198,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="dto"></param>
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.User))]
-        [HttpPut("user/update/{id}")]
+        [HttpPut("user/UpdateById/{id}")]
         public async Task<IActionResult> UpdateUserTask(int id, TaskUpdateDto dto, CancellationToken cancellationToken)
         {
             var result = await _taskService.UpdeteTaskAsync(id, dto, cancellationToken);
@@ -175,7 +217,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
-        [HttpDelete("admin/delete/{id}")]
+        [HttpDelete("admin/DeleteById/{id}")]
         public async Task<IActionResult> DeleteTaskById(int id, CancellationToken cancellationToken)
         {
             var success = await _taskService.DeleteTaskByIdAsync(id, cancellationToken);
@@ -192,7 +234,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.User))]
-        [HttpDelete("user/delete/{id}")]
+        [HttpDelete("user/DeleteById/{id}")]
         public async Task<IActionResult> DeleteUserTaskById(int id, CancellationToken cancellationToken)
         {
             var success = await _taskService.DeleteTaskByIdAsync(id, cancellationToken);

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Application.DTOs.TaskDto;
 using TaskFlow.Application.DTOs.TaskDTOs;
+using TaskFlow.Application.DTOs.UserDTOs;
 
 namespace TaskFlow.Application.Interfaces.Services
 {
@@ -21,6 +22,9 @@ namespace TaskFlow.Application.Interfaces.Services
         /// <param name="id">Id of Task</param>
         /// <returns>TaskGetDto or null</returns>
         Task<TaskGetDto?> GetTaskByIdAsync(int id, CancellationToken cancellationToken);
+        Task<ICollection<TaskGetDto>> GetTasksPaginationAsync(int count, int side, CancellationToken cancellationToken);
+        Task<ICollection<TaskGetDto>> GetProjectTasksPaginationAsync(int projectId, int count, int side, CancellationToken cancellationToken);
+        Task<ICollection<TaskGetDto>> GetTasksByNamePaginationAsync(string name, int projectId, int count, int side, CancellationToken cancellationToken);
         /// <summary>
         /// Return Task by name or piece of name
         /// </summary>
@@ -34,6 +38,13 @@ namespace TaskFlow.Application.Interfaces.Services
         /// <param name="porjectId">The project ID to which the task should belong</param>
         /// <returns>TaskGetDto or null</returns>
         Task<TaskGetDto?> GetTaskByDeadLineAsync(DateTime date, int porjectId, CancellationToken cancellationToken);
+        /// <summary>
+        /// Return Task by status
+        /// </summary>
+        /// <param name="status">Status of Task</param>
+        /// <param name="porjectId">The project ID to which the task should belong</param>
+        /// <returns>TaskGetDto or null</returns>
+        Task<TaskGetDto?> GetTaskByStatusAsync(TaskFlow.Domain.Enums.TaskEnums.TaskStatus status, int projectId, CancellationToken cancellationToken);
         /// <summary>
         /// Create new Task
         /// </summary>
