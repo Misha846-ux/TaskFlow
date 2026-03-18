@@ -14,7 +14,7 @@ namespace TaskFlow.Application.DTOs.UserDTOs
         [EmailAddress]
         public string Email { get; set; }
         public string GlobalRole { get; set; }
-        public string PassTolcon {  get; set; }
+        public string PassToIcon {  get; set; }
         public DateTime CreatedAt { get; set; }
         public ICollection<int> CompaniesId { get; set; }
         public string Settings {  get; set; }

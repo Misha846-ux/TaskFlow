@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,26 +17,123 @@ public class CompanyService : ICompanyService
 {
     private readonly ICompanyRepository _companyRepository;
     private readonly IMapper _mapper;
-
-    public CompanyService(ICompanyRepository companyRepository, IMapper mapper)
+    private readonly ICachingService _cachingService;
+    private readonly ILogger<CompanyService> _logger;
+    public CompanyService(ICompanyRepository companyRepository, IMapper mapper, ICachingService cachingService, ILogger<CompanyService> logger)
     {
-        _companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _companyRepository = companyRepository;
+        _mapper = mapper;
+        _cachingService = cachingService;
+        _logger = logger;
     }
-
     public async Task<int?> CreateCompanyAsync(CompanyPostDto dto, int ownerUserId, CancellationToken cancellationToken)
     {
-        if (dto == null) throw new ArgumentNullException(nameof(dto));
-
-        var entity = _mapper.Map<CompanyEntity>(dto);
         try
         {
-            var createdId = await _companyRepository.AddCompanyAsync(entity, ownerUserId, cancellationToken);
-            return createdId;
+            // Delete the cache for companies if it exists
+            if (await _cachingService.GetAsync<ICollection<CompanyGetDto>>("Companies") != null)
+            {
+                await _cachingService.RemoveAsync("Companies");
+            }
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+
+            var company = _mapper.Map<CompanyEntity>(dto);
+
+            return await _companyRepository.AddCompanyAsync(company, ownerUserId, cancellationToken);
         }
         catch (Exception ex)
         {
-            throw;
+            Console.WriteLine($"An error occurred while creating the company: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task<ICollection<CompanyGetDto>> GetCompaniesPaginationAsync(int count, int side, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var data = await _companyRepository.GetCompaniesPaginationAsync(count, side, cancellationToken);
+            var companies = _mapper.Map<ICollection<CompanyGetDto>>(data);
+            return companies;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while getting pagination companies: {ex.Message}");
+            return new List<CompanyGetDto>();
+        }
+    }
+
+    public async Task<ICollection<CompanyGetDto>> GetUsersCompaniesAsync(int userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var data = await _companyRepository.GetCompaniesByUserIdAsync(userId, cancellationToken);
+            var companies = _mapper.Map<ICollection<CompanyGetDto>>(data);
+            return companies;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while getting user's companies: {ex.Message}");
+            return new List<CompanyGetDto>();
+        }
+    }
+
+    public async Task<ICollection<CompanyGetDto>> GetUsersCompaniesPaginationAsync(int userId, int count, int side, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var data = await _companyRepository.GetCompaniesByUserIdPaginationAsync(userId, count, side, cancellationToken);
+            var companies = _mapper.Map<ICollection<CompanyGetDto>>(data);
+            return companies;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while getting user's pagination companies: {ex.Message}");
+            return new List<CompanyGetDto>();
+        }
+    }
+
+    public async Task<CompanyGetDto?> GetCompanyByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var data = await _companyRepository.GetCompanyByIdAsync(id, cancellationToken);
+
+            if (data == null) return null;
+
+            var company = _mapper.Map<CompanyGetDto>(data);
+
+            return company;
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"An error occurred while getting the company by id: {id}; with an exception: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task<CompanyGetDto?> GetUsersCompanyByIdAsync(int id, int userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var data = await _companyRepository.GetCompanyByIdAsync(id, cancellationToken);
+            if (data == null) return null;
+
+            if(data.Users.Any(u => u.UserId == userId))
+            {
+                var company = _mapper.Map<CompanyGetDto>(data);
+                return company;
+            }
+            else
+            {
+                Console.WriteLine($"User with id: {userId} is not in the company with id: {id}");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while getting the user's company by id: {id}; with an exception: {ex.Message}");
+            return null;
         }
     }
 
@@ -43,122 +141,100 @@ public class CompanyService : ICompanyService
     {
         try
         {
+            if(await _cachingService.GetAsync<ICollection<CompanyGetDto>>("Companies") != null)
+            {
+                await _cachingService.RemoveAsync("Companies");
+            }
+
             return await _companyRepository.DeleteCompanyByIdAsync(id, cancellationToken);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            throw;
+            Console.WriteLine($"An error occurred while deleting the company by id: {id}; with an exception: {ex.Message}");
+            return null;
         }
     }
 
-    /// <summary>
-    /// Удаляет компанию только если userId является владельцем (owner).
-    /// </summary>
     public async Task<int?> DeleteUsersCompanyByIdAsync(int id, int userId, CancellationToken cancellationToken)
     {
-        // Получаем компанию вместе с CompanyUsers
-        var company = await _companyRepository.GetCompanyByIdAsync(id, cancellationToken);
-        if (company == null) return null;
-
-        // Проверяем, есть ли у пользователя роль Owner
-        var isOwner = company.CompanyUsers?.Any(u => u.UserId == userId && u.CompanyRole == CompanyRole.Owner) ?? false;
-        if (!isOwner)
+        try
         {
-            // Можно бросить UnauthorizedAccessException или вернуть null
-            throw new UnauthorizedAccessException("User is not owner of the company.");
-        }
+            var company = await _companyRepository.GetCompanyByIdAsync(id, cancellationToken);
+            if (company == null) return null;
 
-        // Удаляем
-        return await _companyRepository.DeleteCompanyByIdAsync(id, cancellationToken);
+            if (company.Users.Any(u =>u.UserId == userId && u.CompanyRole.ToString() == "Owner"))
+            {
+
+                if (await _cachingService.GetAsync<ICollection<CompanyGetDto>>("Companies") != null)
+                {
+                    await _cachingService.RemoveAsync("Companies");
+                }
+
+                return await _companyRepository.DeleteCompanyByIdAsync(id, cancellationToken);
+            }
+            else
+            {
+                Console.WriteLine($"User with id: {userId} can not delete the company with id: {id}");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while deleting the user's company by id: {id}; with an exception: {ex.Message}");
+            return null;
+        }
     }
 
     public async Task<ICollection<CompanyGetDto>> GetAllCompaniesAsync(CancellationToken cancellationToken)
     {
-        var entities = await _companyRepository.GetAllCompaniesAsync(cancellationToken);
-
-        return _mapper.Map<ICollection<CompanyGetDto>>(entities);
-    }
-
-    public async Task<ICollection<CompanyGetDto>> GetCompaniesPaginationAsync(int count, int side, CancellationToken cancellationToken)
-    {
-        var entities = await _companyRepository.GetCompaniesPaginationAsync(count, side, cancellationToken);
-        if (entities == null) return new List<CompanyGetDto>();
-
-        return _mapper.Map<ICollection<CompanyGetDto>>(entities);
-    }
-
-    public async Task<CompanyGetDto?> GetCompanyByIdAsync(int id, CancellationToken cancellationToken)
-    {
-        var entity = await _companyRepository.GetCompanyByIdAsync(id, cancellationToken);
-        if (entity == null) return null;
-        return _mapper.Map<CompanyGetDto>(entity);
-    }
-
-    public async Task<ICollection<CompanyGetDto>> GetUsersCompaniesAsync(int userId, CancellationToken cancellationToken)
-    {
-        var entities = await _companyRepository.GetCompaniesByUserIdAsync(userId, cancellationToken);
-        if (entities == null) return new List<CompanyGetDto>();
-        return _mapper.Map<ICollection<CompanyGetDto>>(entities);
-    }
-
-    public async Task<ICollection<CompanyGetDto>> GetUsersCompaniesPaginationAsync(int userId, int side, int count, CancellationToken cancellationToken)
-    {
-        var entities = await _companyRepository.GetCompaniesByUserIdPaginationAsync(userId, count, side, cancellationToken);
-        if (entities == null) return new List<CompanyGetDto>();
-        return _mapper.Map<ICollection<CompanyGetDto>>(entities);
-    }
-
-    public async Task<CompanyGetDto?> GetUsersCompanyByIdAsync(int id, int userId, CancellationToken cancellationToken)
-    {
-        var company = await _companyRepository.GetCompanyByIdAsync(id, cancellationToken);
-        if (company == null) return null;
-
-        var isMember = company.CompanyUsers?.Any(u => u.UserId == userId) ?? false;
-        if (!isMember)
+        try
         {
-            throw new UnauthorizedAccessException("User is not a member of this company.");
+            if (await _cachingService.GetAsync<ICollection<CompanyGetDto>>("Companies") != null)
+            {
+                return await _cachingService.GetAsync<ICollection<CompanyGetDto>>("Companies");
+            }
+            else
+            {
+                var data = await _companyRepository.GetAllCompaniesAsync(cancellationToken);
+                var companies = _mapper.Map<ICollection<CompanyGetDto>>(data);
+                await _cachingService.SetAsync("Companies", companies, TimeSpan.FromMinutes(20));
+                return companies;
+            }
         }
-
-        return _mapper.Map<CompanyGetDto>(company);
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while getting all companies: {ex.Message}");
+            return new List<CompanyGetDto>();
+        }
     }
 
-    public async Task<int?> UpdateCompanyByIdAsync(int id, CompanyUpdateDto dto, CancellationToken cancellationToken)
+    public async Task<int?> UpdateCompanyByIdAsync(CompanyUpdateDto dto, CancellationToken cancellationToken)
     {
-        if (dto == null) throw new ArgumentNullException(nameof(dto));
-
-        // Создаём CompanyEntity с Id и полями из dto — репозиторий сам обновит только непустые поля
-        var newEntity = new CompanyEntity
+        try
         {
-            Id = id,
-            Name = dto.Name,
-            Description = dto.Description
-        };
-
-        var updated = await _companyRepository.UpdateCompanyAsync(newEntity, cancellationToken);
-        return updated?.Id;
+            var company = _mapper.Map<CompanyEntity>(dto);
+            await _companyRepository.UpdateCompanyAsync(company, cancellationToken);
+            return company.Id;
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning("An error occurred while updating the company");
+            return null;
+        }
     }
 
-    public async Task UpdateUsersCompanyByIdAsync(int id, CompanyUpdateDto dto, int userId, CancellationToken cancellationToken)
+    //Maybe still required to redo this method starting from the reppsitory and entities
+    public async Task UpdateUsersCompanyByIdAsync(CompanyOfUserUpdateDto companyDto, CancellationToken cancellationToken)
     {
-        if (dto == null) throw new ArgumentNullException(nameof(dto));
-
-        var company = await _companyRepository.GetCompanyByIdAsync(id, cancellationToken);
-        if (company == null) throw new InvalidOperationException("Company not found.");
-
-        // проверка прав — допускаем владельца или администратора компании
-        var hasRight = company.CompanyUsers?.Any(u =>
-            u.UserId == userId && (u.CompanyRole == CompanyRole.Owner || u.CompanyRole == CompanyRole.Manager)) ?? false;
-
-        if (!hasRight)
-            throw new UnauthorizedAccessException("User has no rights to update this company.");
-
-        var newEntity = new CompanyEntity
+        try
         {
-            Id = id,
-            Name = dto.Name,
-            Description = dto.Description
-        };
-
-        await _companyRepository.UpdateCompanyAsync(newEntity, cancellationToken);
+            var company = _mapper.Map<CompanyUserEntity>(companyDto);
+            await _companyRepository.UpdateCompanyUserAsync(company, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("An error occurred while updating the user's company");
+        }
     }
 }
+

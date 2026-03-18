@@ -1,13 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 using TaskFlow.Application.DTOs.ComapniesDTOs;
+using TaskFlow.Application.Interfaces.Services;
 
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     [Authorize]
-    public class CompanyController : ControllerBase
+    public class CompanyController(ICompanyService _companyService) : ControllerBase
     {
         //===========================================Get=============================================
         /// <summary>
@@ -16,9 +18,18 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                var companies = await _companyService.GetAllCompaniesAsync(cancellationToken);
+                return Ok(companies);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in controller while getting all companies with an exception: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         /// <summary>
@@ -29,9 +40,18 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [HttpGet("Filtred")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetPagination([FromQuery] int count, int side)
+        public async Task<IActionResult> GetPagination([FromQuery] int count, int side, CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                var companies = await _companyService.GetCompaniesPaginationAsync(count, side, cancellationToken);
+                return Ok(companies);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in controller while getting companies paggination with an exception: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         /// <summary>
@@ -65,9 +85,18 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [HttpGet("ById")]
         [Authorize(Roles = "Admin")]
-        public Task<IActionResult> GetCompanyById([FromRoute] int id)
+        public async Task<IActionResult> GetCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                var companies = await _companyService.GetCompanyByIdAsync(id, cancellationToken);
+                return Ok(companies);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in controller while getting company by id with an exception: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         /// <summary>
@@ -103,9 +132,18 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [HttpDelete("DeleteForAdmin")]
         [Authorize(Roles = "Admin")]
-        public Task<IActionResult> DeleteCompanyByIdForAdmin([FromRoute] int id)
+        public async Task<IActionResult> DeleteCompanyByIdForAdmin([FromRoute] int id, CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                await _companyService.DeleteCompanyByIdAsync(id, cancellationToken);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in controller while deleting company by id with an exception: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         /// <summary>
@@ -128,7 +166,7 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [HttpPut("UpdateForAdmin")]
         [Authorize(Roles = "Admin")]
-        public Task<IActionResult> UpdateForAdmin([FromBody] CompanyUpdateDto company)
+        public async Task<IActionResult> UpdateForAdmin([FromBody] CompanyUpdateDto company, CancellationToken cancellationToken)
         {
             return null;
         }

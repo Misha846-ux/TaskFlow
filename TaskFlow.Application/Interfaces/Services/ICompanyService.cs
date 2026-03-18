@@ -12,19 +12,19 @@ public interface ICompanyService
     /// <summary>
     /// Возвращает все компании
     /// </summary>
-    Task<ICollection<CompanyGetDto>> GetAllCompaniesAsync(CancellationToken cancellationToken);
+    Task<ICollection<CompanyGetDto>?> GetAllCompaniesAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Возвращает компании порционно 
     /// </summary>
     /// <param name="page">Номер страницы </param>
     /// <param name="pageSize">Размер страницы</param>
-    Task<ICollection<CompanyGetDto>> GetCompaniesPaginationAsync(int count, int side, CancellationToken cancellationToken);
+    Task<ICollection<CompanyGetDto>?> GetCompaniesPaginationAsync(int count, int side, CancellationToken cancellationToken);
 
     /// <summary>
     /// Возвращает список компаний, к которым принадлежит пользователь 
     /// </summary>
-    Task<ICollection<CompanyGetDto>> GetUsersCompaniesAsync(int userId, CancellationToken cancellationToken);
+    Task<ICollection<CompanyGetDto>?> GetUsersCompaniesAsync(int userId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Возвращает компании пользователя порционно 
@@ -32,7 +32,7 @@ public interface ICompanyService
     /// <param name="userId">Id текущего пользователя.</param>
     /// <param name="side">Номер страницы</param>
     /// <param name="count">Размер страницы</param>
-    Task<ICollection<CompanyGetDto>> GetUsersCompaniesPaginationAsync(int userId, int side, int count, CancellationToken cancellationToken);
+    Task<ICollection<CompanyGetDto>?> GetUsersCompaniesPaginationAsync(int userId, int count, int side, CancellationToken cancellationToken);
 
     /// <summary>
     /// Получить информацию о компании по Id
@@ -64,10 +64,10 @@ public interface ICompanyService
     /// <summary>
     /// Обновляет данные компании (для Admin — без проверки прав).
     /// </summary>
-    Task<int?> UpdateCompanyByIdAsync(int id, CompanyUpdateDto dto, CancellationToken cancellationToken);
+    Task<int?> UpdateCompanyByIdAsync(CompanyUpdateDto dto, CancellationToken cancellationToken);
 
     /// <summary>
     /// Обновляет данные компании (только для пользователей, имеющих право в этой компании).
     /// </summary>
-    Task UpdateUsersCompanyByIdAsync(int id, CompanyUpdateDto dto, int userId, CancellationToken cancellationToken);
+    Task UpdateUsersCompanyByIdAsync(CompanyOfUserUpdateDto companyDto, CancellationToken cancellationToken);
 }
