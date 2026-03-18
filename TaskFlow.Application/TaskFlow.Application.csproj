@@ -18,4 +18,8 @@
     <PackageReference Include="AutoMapper" Version="16.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\ProjectDTOs\" />
+  </ItemGroup>
+
 </Project>

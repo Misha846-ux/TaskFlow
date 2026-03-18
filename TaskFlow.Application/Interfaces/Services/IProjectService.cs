@@ -3,120 +3,129 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TaskFlow.Application.DTOs.ProjectDTOs.CommonDTOs;
-using TaskFlow.Application.DTOs.ProjectDTOs.CreateProjectDTOs;
-using TaskFlow.Application.DTOs.ProjectDTOs.DetailsProjectDTOs;
-using TaskFlow.Application.DTOs.ProjectDTOs.ListProjectDTOs;
-using TaskFlow.Application.DTOs.ProjectDTOs.UpdateProjectDTOs;
+using TaskFlow.Application.DTOs.ProjectDTOs;
+using TaskFlow.Application.DTOs.UserDTOs;
 
 namespace TaskFlow.Application.Interfaces.Services
 {
     public interface IProjectService
     {
         /// <summary>
-        /// Создаёт новый проект.
+        /// Creates a new project.
         /// </summary>
-        /// <param name="dto">DTO с данными проекта.</param>
-        Task<int?> CreateProjectAsync(CreateProjectDto dto, CancellationToken cancellationToken);
+        /// <param name="dto"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<int?> CreateProjectAsync(ProjectPostDto dto, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Получает проект по Id.
-        /// Доступно только если пользователь является участником проекта.
+        /// Returns a project by id.
         /// </summary>
-        /// <param name="id">Id проекта.</param>
-        /// <param name="userId">Id текущего пользователя.</param>
-        Task<ProjectDetailsDto?> GetProjectByIdAsync(int id, int userId, CancellationToken cancellationToken);
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ProjectGetDto?> GetProjectByIdAsync(int id, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Получает проект по Id без ограничений доступа (для Админа).
+        /// Returns a project by name.
         /// </summary>
-        /// <param name="id">Id проекта.</param>
-        Task<ProjectDetailsDto?> GetProjectByIdAdminAsync(int id, CancellationToken cancellationToken);
+        /// <param name="name"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ProjectGetDto?> GetProjectByNameAsync(string name, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Возвращает список проектов с фильтрацией и пагинацией.
+        /// Returns all projects.
         /// </summary>
-        /// <param name="filter">Параметры фильтрации и пагинации.</param>
-        /// <param name="userId">Id пользователя.</param>
-        Task<PagedResponseDto<ProjectListItemDto>> GetProjectsAsync(ProjectFilterDto filter, int userId, CancellationToken cancellationToken);
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ICollection<ProjectGetDto>> GetAllProjectsAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        /// Возвращает список всех проектов с фильтрацией и пагинацией (для Админа).
+        /// Returns projects portion.
         /// </summary>
-        /// <param name="filter">Параметры фильтрации и пагинации.</param>
-        Task<PagedResponseDto<ProjectListItemDto>> GetProjectsAdminAsync(ProjectFilterDto filter, CancellationToken cancellationToken);
+        /// <param name="count"></param>
+        /// <param name="side"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ICollection<ProjectGetDto>> GetProjectsPaginationAsync(int count, int side, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Выполняет поиск проектов по названию.
+        /// Returns projects by company id.
         /// </summary>
-        /// <param name="name">Строка для поиска.</param>
-        /// <param name="userId">Id пользователя.</param>
-        /// <param name="page">Номер страницы.</param>
-        /// <param name="pageSize">Размер страницы.</param>
-        Task<PagedResponseDto<ProjectListItemDto>> GetProjectsByNameAsync(string name, int userId, int page, int pageSize, CancellationToken cancellationToken);
+        /// <param name="companyId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ICollection<ProjectGetDto>> GetProjectsByCompanyIdAsync(int companyId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Выполняет поиск проектов по названию среди всех проектов (для Админа).
+        /// Returns projects by company id portion.
         /// </summary>
-        /// <param name="name">Строка для поиска.</param>
-        /// <param name="page">Номер страницы.</param>
-        /// <param name="pageSize">Размер страницы.</param>
-        Task<PagedResponseDto<ProjectListItemDto>> GetProjectsByNameAdminAsync(string name, int page, int pageSize, CancellationToken cancellationToken);
+        /// <param name="companyId"></param>
+        /// <param name="count"></param>
+        /// <param name="side"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ICollection<ProjectGetDto>> GetProjectsByCompanyIdPaginationAsync(int companyId, int count, int side, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Возвращает список пользователей проекта.
+        /// Returns projects by user Id.
         /// </summary>
-        /// <param name="projectId">Id проекта.</param>
-        /// <param name="userId">Id пользователя.</param>
-        Task<ICollection<ProjectUserListItemDto>> GetProjectUsersAsync(int projectId, int userId, CancellationToken cancellationToken);
+        /// <param name="userId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ICollection<ProjectGetDto>> GetUserProjectsAsync(int userId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Возвращает список пользователей проекта без ограничений (для Админа).
+        /// Returns projects by user Id portion.
         /// </summary>
-        /// <param name="projectId">Id проекта.</param>
-        Task<ICollection<ProjectUserListItemDto>> GetProjectUsersAdminAsync(int projectId, CancellationToken cancellationToken);
+        /// <param name="userId"></param>
+        /// <param name="count"></param>
+        /// <param name="side"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ICollection<ProjectGetDto>> GetUserProjectsPaginationAsync(int userId, int count, int side, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Добавляет пользователя в проект.
+        /// Updates a project.
         /// </summary>
-        /// <param name="projectId">Id проекта.</param>
-        /// <param name="dto">DTO с данными пользователя и ролью.</param>
-        Task<int?> AddUserToProjectAsync(int projectId, AddUserToProjectDto dto, CancellationToken cancellationToken);
+        /// <param name="id"></param>
+        /// <param name="dto"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<int?> UpdateProjectAsync(int id, ProjectUpdateDto dto, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Удаляет пользователя из проекта.
+        /// Adds a user to a project.
         /// </summary>
-        /// <param name="projectUserId">Id связи пользователя с проектом.</param>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<int?> AddUserToProjectAsync(int projectId, int userId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Returns users of a project.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ICollection<UserGetDto>> GetProjectUsersAsync(int projectId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Removes a user from a project.
+        /// </summary>
+        /// <param name="projectUserId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         Task<int?> RemoveUserFromProjectAsync(int projectUserId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Обновляет данные проекта.
-        /// Доступно только пользователям, имеющим доступ к проекту.
+        /// Deletes a project by id.
         /// </summary>
-        /// <param name="id">Id проекта.</param>
-        /// <param name="dto">DTO с новыми данными.</param>
-        /// <param name="userId">Id пользователя.</param>
-        Task UpdateProjectAsync(int id, UpdateProjectDto dto, int userId, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Обновляет данные проекта без проверки доступа (для Админа).
-        /// </summary>
-        /// <param name="id">Id проекта.</param>
-        /// <param name="dto">DTO с новыми данными.</param>
-        Task UpdateProjectAdminAsync(int id, UpdateProjectDto dto, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Удаляет проект.
-        /// Доступно только пользователям, имеющим доступ к проекту.
-        /// </summary>
-        /// <param name="id">Id проекта.</param>
-        /// <param name="userId">Id пользователя.</param>
-        Task<int?> DeleteProjectAsync(int id, int userId, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Удаляет проект без проверки доступа (для Админа).
-        /// </summary>
-        /// <param name="id">Id проекта.</param>
-        Task<int?> DeleteProjectAdminAsync(int id, CancellationToken cancellationToken);
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<int?> DeleteProjectAsync(int id, CancellationToken cancellationToken);
     }
 }
