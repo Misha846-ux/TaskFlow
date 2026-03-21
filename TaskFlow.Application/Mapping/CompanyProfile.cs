@@ -23,10 +23,19 @@ public class CompanyProfile : Profile
                opt => opt.MapFrom(src => src.Projects.Select(p => p.Id))
            );
 
-        CreateMap<CompanyPostDto, CompanyEntity>();
+        CreateMap<CompanyPostDto, CompanyEntity>()
+            .ForMember(dest => dest.Users, opt => opt.Ignore())
+            .ForMember(dest => dest.Projects, opt => opt.Ignore())
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
-        CreateMap<CompanyUpdateDto, CompanyEntity>();
+        CreateMap<CompanyUpdateDto, CompanyEntity>()
+            .ForMember(dest => dest.Users, opt => opt.Ignore())
+            .ForMember(dest => dest.Projects, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
-        CreateMap<CompanyOfUserUpdateDto, CompanyUserEntity>();
+        CreateMap<CompanyOfUserUpdateDto, CompanyUserEntity>()
+            .ForMember(dest => dest.Company, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.Ignore());
     }
 }

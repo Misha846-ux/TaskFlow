@@ -13,7 +13,7 @@ namespace TaskFlow.Application.DTOs.UserDTOs
         public string? UserName { get; set; } = null;
         [EmailAddress]
         public string? Email { get; set; } = null;
-        public int? GlobaleRole { get; set; } = null;
+        public string? GlobaleRole { get; set; } = null;
         public string? Password { get; set; } = null;
         public string? PassToIcon { get; set; } = null;
         public string? Settings { get; set; } = null;

@@ -17,14 +17,23 @@ public class TaskProfile : Profile
         CreateMap<TaskEntity, TaskGetDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
             .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => src.Priority.ToString()));
-        //We do not need to map the UserId property because it is already included in the TaskGetDto and TaskPostDto, and it will be automatically mapped by AutoMapper based on the property names
-        //.ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
 
         CreateMap<TaskPostDto, TaskEntity>()
-            .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => src.Priority.ToString()));
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => src.Priority.ToString()))
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.Project, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.Ignore());
+
 
         CreateMap<TaskUpdateDto, TaskEntity>()
             .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => src.Priority.ToString()))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ProjectId, opt => opt.Ignore())
+            .ForMember(dest => dest.Project, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.Ignore());
     }
 }
