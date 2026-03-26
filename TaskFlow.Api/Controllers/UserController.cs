@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Interfaces.Services;
 using TaskFlow.Domain.Enums;
@@ -94,10 +95,11 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("Delete")]
-        public Task<IActionResult> Delete(CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(CancellationToken cancellationToken)
         {
-            Console.WriteLine("User Controller: Delete for user. Не закончен нет необходимых методов");
-            return null;
+            int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            await _userService.DeleteUserByIdAsync(userId, cancellationToken);
+            return Ok();
         }
 
 
@@ -126,10 +128,11 @@ namespace TaskFlow.Api.Controllers
         /// Поля значение которых будет null изменению не подвергнутся и будут сохранены</param>
         /// <returns></returns>
         [HttpPut("Update")]
-        public Task<IActionResult> Update([FromBody] UserUpdateDto newUser, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update([FromBody] UserUpdateDto newUser, CancellationToken cancellationToken)
         {
-            Console.WriteLine("User Controller: Update for user. Не закончен нет необходимых методов");
-            return null;
+            newUser.Id = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            UserGetDto user = await _userService.UpdateUserForAdminAsync(newUser, cancellationToken);
+            return Ok(user);
         }
     }
 }
