@@ -10,6 +10,7 @@ using TaskFlow.Domain.Entities;
 using TaskFlow.Domain.Enums;
 using AutoMapper;
 using TaskFlow.Application.DTOs.UserDTOs;
+using TaskFlow.Application.Exceptions;
 
 namespace TaskFlow.Application.Services
 {
@@ -30,7 +31,7 @@ namespace TaskFlow.Application.Services
         {
             if (dto == null)
             {
-                throw new ArgumentNullException(nameof(dto));
+                throw new BadRequestException("Project data is required");
             }
             var entity = _mapper.Map<ProjectEntity>(dto);
             var createdId = await _projectRepository.CreateProjectAsync(entity, cancellationToken);
@@ -52,7 +53,7 @@ namespace TaskFlow.Application.Services
             var entity = await _projectRepository.GetProjectByIdAsync(id, cancellationToken);
             if (entity == null)
             {
-                return null;
+                throw new NotFoundException($"Project with id {id} not found");
             }
             var dto = _mapper.Map<ProjectGetDto>(entity);
             await _cacheService.SetAsync($"Projects:admin:id:{id}", dto, null);
@@ -69,7 +70,7 @@ namespace TaskFlow.Application.Services
             var entity = await _projectRepository.GetProjectByNameAsync(name, cancellationToken);
             if (entity == null)
             {
-                return null;
+                throw new NotFoundException($"Project with name '{name}' not found");
             }
             var dto = _mapper.Map<ProjectGetDto>(entity);
             await _cacheService.SetAsync($"Projects:admin:name:{name}", dto, null);
@@ -158,12 +159,12 @@ namespace TaskFlow.Application.Services
         {
             if (dto == null)
             {
-                throw new ArgumentNullException(nameof(dto));
+                throw new BadRequestException("Project data is required");
             }
             var project = await _projectRepository.GetProjectByIdAsync(id, cancellationToken);
             if (project == null)
             {
-                return null;
+                throw new NotFoundException($"Project with id {id} not found");
             }
             var entity = _mapper.Map<ProjectEntity>(dto);
             entity.Id = id;
@@ -210,7 +211,7 @@ namespace TaskFlow.Application.Services
             var projectUser = await _projectRepository.GetProjectUserByIdAsync(projectUserId, cancellationToken);
             if (projectUser == null)
             {
-                return null;
+                throw new NotFoundException($"ProjectUser with id {projectUserId} not found");
             }
             var result = await _projectRepository.RemoveUserFromProjectAsync(projectUserId, cancellationToken);
             if (result != null)
@@ -226,7 +227,7 @@ namespace TaskFlow.Application.Services
             var project = await _projectRepository.GetProjectByIdAsync(id, cancellationToken);
             if (project == null)
             {
-                return null;
+                throw new NotFoundException($"Project with id {id} not found");
             }
             var result = await _projectRepository.DeleteProjectByIdAsync(id, cancellationToken);
             if (result != null)
