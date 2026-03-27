@@ -287,7 +287,7 @@ namespace TaskFlow.Application.Services
                 {
                     throw new UnauthorizedAccessException();
                 }
-                else if (user.RecoveryTokenLifeTime >= DateTime.Now)
+                else if (user.RecoveryTokenLifeTime <= DateTime.Now)
                 {
                     throw new UnauthorizedAccessException();
                 }
@@ -324,7 +324,7 @@ namespace TaskFlow.Application.Services
                 {
                     throw new Exception("Token not found");
                 }
-                else if(token.Expires >= DateTime.Now)
+                else if(token.Expires <= DateTime.Now)
                 {
                     throw new Exception("The token's lifetime has expired");
                 }
