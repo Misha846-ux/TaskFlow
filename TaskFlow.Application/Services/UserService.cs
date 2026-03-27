@@ -333,11 +333,11 @@ namespace TaskFlow.Application.Services
             }
             catch (OperationCanceledException oex)
             {
-                throw new Exception("User Sevice: LoginWithRecoveryTokenAsync operation were canceled");
+                throw new Exception("User Sevice: RefreshAsync operation were canceled");
             }
             catch (Exception ex)
             {
-                throw new Exception("User Service: Problem with LoginWithRecoveryTokenAsync");
+                throw new Exception("User Service: Problem with RefreshAsync", ex);
             }
         }
 

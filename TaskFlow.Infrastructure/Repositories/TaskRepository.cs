@@ -287,9 +287,10 @@ namespace TaskFlow.Infrastructure.Repositories
                 PropertyInfo[] properties = typeof(TaskEntity).GetProperties();
                 foreach (PropertyInfo prop in properties)
                 {
-                    if(prop.GetValue(newTask) != null)
+                    var value = prop.GetValue(newTask);
+                    if(value != null && value != string.Empty)
                     {
-                        prop.SetValue(task, newTask);
+                        prop.SetValue(task, value);
                     }
                 }
                 await _context.SaveChangesAsync(cancellationToken);

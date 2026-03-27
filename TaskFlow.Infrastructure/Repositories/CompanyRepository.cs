@@ -311,9 +311,10 @@ namespace TaskFlow.Infrastructure.Repositories
                 PropertyInfo[] properties = typeof(CompanyUserEntity).GetType().GetProperties();
                 foreach (var prop in properties)
                 {
-                    if (prop.GetValue(newCompanyUser) != null)
+                    var value = prop.GetValue(newCompanyUser);
+                    if (value != null && value != string.Empty)
                     {
-                        prop.SetValue(companyUser, newCompanyUser);
+                        prop.SetValue(companyUser, value);
                     }
                 }
 
