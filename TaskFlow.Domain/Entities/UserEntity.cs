@@ -28,7 +28,7 @@ namespace TaskFlow.Domain.Entities
         public string? RecoveryTokenHash {  get; set; }
         public DateTime? RecoveryTokenLifeTime { get; set; } 
         public ICollection<TaskEntity> Tasks { get; set; }
-        public ICollection<ProjectUserEntity> Projects { get; set; }
+        public ICollection<ProjectEntity> Projects { get; set; }
         public ICollection<CompanyUserEntity> Companies { get; set; }
         public ICollection<ChangeEntity> Changes { get; set; }
         public ICollection<RefreshTokenEntity> RefreshTokens { get; set; }

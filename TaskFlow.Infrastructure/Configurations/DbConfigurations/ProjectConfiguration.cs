@@ -23,7 +23,7 @@ namespace TaskFlow.Infrastructure.Configurations.DbConfigurations
 
             builder.HasOne(p => p.Company).WithMany(c => c.Projects).HasForeignKey(p => p.CompanyId);
 
-            builder.HasMany(p => p.Users).WithOne(u => u.Project).HasForeignKey(p => p.ProjectId);
+            builder.HasMany(p => p.Users).WithMany(u => u.Projects);
 
             builder.HasMany(p => p.Tasks).WithOne(t => t.Project).HasForeignKey(t => t.ProjectId);
         }

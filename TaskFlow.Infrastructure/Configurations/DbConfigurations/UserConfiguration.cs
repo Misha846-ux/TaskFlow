@@ -30,7 +30,7 @@ namespace TaskFlow.Infrastructure.Configurations.DbConfigurations
 
             builder.HasMany(u => u.Tasks).WithOne(t => t.User).HasForeignKey(t => t.UserId);
 
-            builder.HasMany(u => u.Projects).WithOne(p => p.User).HasForeignKey(p => p.UserId);
+            builder.HasMany(u => u.Projects).WithMany(p => p.Users);
 
             builder.HasMany(u => u.RefreshTokens).WithOne(r => r.User).HasForeignKey(r => r.UserId);
 
