@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Text;
+using TaskFlow.Api.ExceptionHandlers;
 using TaskFlow.Application.Interfaces.Helpers;
 using TaskFlow.Application.Interfaces.Repositories;
 using TaskFlow.Application.Interfaces.Services;
@@ -58,10 +59,14 @@ namespace TaskFlow.Api
             builder.Services.AddScoped<IProjectService, ProjectService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ICompanyService, CompanyService>();
-            builder.Services.AddScoped<IJwtService,  JwtService>();
+            builder.Services.AddScoped<IJwtService, JwtService>();
 
             //==================Helpers============================
             builder.Services.AddScoped<IHashHelper, HashHelper>();
+
+            //================== Exception Handler ============================
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
 
             //==================Redis============================
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
@@ -137,10 +142,10 @@ namespace TaskFlow.Api
                 app.UseSwaggerUI();
             }
 
+            app.UseExceptionHandler();
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

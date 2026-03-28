@@ -10,7 +10,7 @@ namespace TaskFlow.Api.Controllers
     [ApiController]
     [Route("[controller]")]
     [Authorize]
-    public class UserController(IUserService _userService): ControllerBase
+    public class UserController(IUserService _userService) : ControllerBase
     {
         //========================================Get=============================================
         [HttpGet]
