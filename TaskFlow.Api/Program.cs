@@ -133,8 +133,24 @@ namespace TaskFlow.Api
             builder.Services.AddAuthorization();
 
 
+            //==================Redis============================
+            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var config = builder.Configuration.GetConnectionString("Redis");
+                return ConnectionMultiplexer.Connect(config);
+            });
+            //====================React=============================
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReact",
+                    policy => policy
+                        .WithOrigins("http://localhost:5173/")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+            });
             var app = builder.Build();
 
+            app.UseCors("AllowReact");
             // ================= Middleware =================
             if (app.Environment.IsDevelopment())
             {
