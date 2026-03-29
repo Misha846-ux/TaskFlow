@@ -233,7 +233,7 @@ public class CompanyService : ICompanyService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning("An error occurred while updating the user's company");
+            _logger.LogWarning("An error occurred in CompanyService while updating the user's company");
         }
     }
 }

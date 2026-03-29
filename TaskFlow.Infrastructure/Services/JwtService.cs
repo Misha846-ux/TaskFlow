@@ -22,11 +22,13 @@ namespace TaskFlow.Infrastructure.Services
     {
         private readonly JwtSettings _jwtSettings;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly JwtSecurityTokenHandler _handler;
 
         public JwtService(IOptions<JwtSettings> jwtSettings, IRefreshTokenRepository refreshTokenRepository)
         {
             _jwtSettings = jwtSettings.Value;
             _refreshTokenRepository = refreshTokenRepository;
+            _handler = new JwtSecurityTokenHandler();
         }
 
         public string GenerateAccessToken(UserEntity user)
@@ -76,11 +78,10 @@ namespace TaskFlow.Infrastructure.Services
 
         public ClaimsPrincipal? DecodeToken(string token)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtSettings.Key);
             try
             {
-                var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+                var principal = _handler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
@@ -95,6 +96,19 @@ namespace TaskFlow.Infrastructure.Services
             }
             catch
             {
+                return null;
+            }
+        }
+        public string? GetTokenUsersId(string JwtToken)
+        {
+            try
+            {
+                var token = _handler.ReadJwtToken(JwtToken);
+                return token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            }
+            catch(Exception ex) 
+            {
+                Console.WriteLine($"An error has occurred in JwtService while trying getting an users Id: { ex.Message}");
                 return null;
             }
         }

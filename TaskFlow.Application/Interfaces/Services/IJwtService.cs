@@ -15,5 +15,6 @@ namespace TaskFlow.Application.Interfaces.Services
         Task<RefreshTokenEntity?> GetRefreshTokenAsync(string token);
         Task RevokeRefreshTokenAsync(string token);
         ClaimsPrincipal? DecodeToken(string token);
+        string? GetTokenUsersId(string JwtToken);
     }
 }
