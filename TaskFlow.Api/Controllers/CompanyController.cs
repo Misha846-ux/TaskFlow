@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using TaskFlow.Application.DTOs.ComapniesDTOs;
 using TaskFlow.Application.Interfaces.Services;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     [Authorize]
-    public class CompanyController(ICompanyService _companyService) : ControllerBase
+    public class CompanyController(ICompanyService _companyService, IJwtService _jwtService) : ControllerBase
     {
         //===========================================Get=============================================
         /// <summary>
@@ -28,7 +29,7 @@ namespace TaskFlow.Api.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred in controller while getting all companies with an exception: {ex.Message}");
-                return StatusCode(500, "An error occurred while processing your request.");
+                return null;
             }
         }
 
@@ -50,7 +51,7 @@ namespace TaskFlow.Api.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred in controller while getting companies paggination with an exception: {ex.Message}");
-                return StatusCode(500, "An error occurred while processing your request.");
+                return null;
             }
         }
 
@@ -60,9 +61,30 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("MyCompanies")]
-        public async Task<IActionResult> GetAllMyComapnies()
+        public async Task<IActionResult> GetAllMyComapnies(CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                var authHeader = Request.Headers["Authorization"].ToString();
+
+                if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
+                    return Unauthorized("Missing or invalid Authorization header.");
+
+                var token = authHeader["Bearer ".Length..].Trim();
+
+                var userIdString = _jwtService.GetTokenUsersId(token);
+                if (!int.TryParse(userIdString, out var userId))
+                    return Unauthorized("Invalid user id in token.");
+
+                var companies = await _companyService.GetUsersCompaniesAsync(userId, cancellationToken);
+
+                return Ok(companies);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while getting user's companies: {ex.Message}");
+                return BadRequest("An error occurred while getting the company.");
+            }
         }
 
         /// <summary>
@@ -73,9 +95,30 @@ namespace TaskFlow.Api.Controllers
         /// <param name="side">Номер порции данных</param>
         /// <returns></returns>
         [HttpGet("Filtred/MyCompanies")]
-        public async Task<IActionResult> GetMyCompaniesPagination([FromQuery] int count, int side)
+        public async Task<IActionResult> GetMyCompaniesPagination([FromQuery] int count, int side, CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                var authHeader = Request.Headers["Authorization"].ToString();
+
+                if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
+                    return Unauthorized("Missing or invalid Authorization header.");
+
+                var token = authHeader["Bearer ".Length..].Trim();
+
+                var userIdString = _jwtService.GetTokenUsersId(token);
+                if (!int.TryParse(userIdString, out var userId))
+                    return Unauthorized("Invalid user id in token.");
+
+                var companies = await _companyService.GetUsersCompaniesPaginationAsync(userId, count, side, cancellationToken);
+
+                return Ok(companies);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while getting user's companies pagination: {ex.Message}");
+                return BadRequest("An error occurred while getting the company.");
+            }
         }
 
         /// <summary>
@@ -95,7 +138,7 @@ namespace TaskFlow.Api.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred in controller while getting company by id with an exception: {ex.Message}");
-                return StatusCode(500, "An error occurred while processing your request.");
+                return null;
             }
         }
 
@@ -105,9 +148,30 @@ namespace TaskFlow.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("MyCompanyById")]
-        public Task<IActionResult> GetMyCompanyById([FromRoute] int id)
+        public async Task<IActionResult> GetMyCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                var authHeader = Request.Headers["Authorization"].ToString();
+
+                if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
+                    return Unauthorized("Missing or invalid Authorization header.");
+
+                var token = authHeader["Bearer ".Length..].Trim();
+
+                var userIdString = _jwtService.GetTokenUsersId(token);
+                if (!int.TryParse(userIdString, out var userId))
+                    return Unauthorized("Invalid user id in token.");
+
+                var company = await _companyService.GetUsersCompanyByIdAsync(id, userId, cancellationToken);
+
+                return Ok(company);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while getting user's company by id: {ex.Message}");
+                return BadRequest("An error occurred while getting the company.");
+            }
         }
 
         //===========================================Post============================================
@@ -118,9 +182,30 @@ namespace TaskFlow.Api.Controllers
         /// <param name="company"></param>
         /// <returns></returns>
         [HttpPost("AddCompany")]
-        public Task<IActionResult> AddCompany([FromBody] CompanyPostDto company)
+        public async Task<IActionResult> AddCompany([FromBody] CompanyPostDto company, CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                var authHeader = Request.Headers["Authorization"].ToString();
+
+                if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
+                    return Unauthorized("Missing or invalid Authorization header.");
+
+                var token = authHeader["Bearer ".Length..].Trim();
+
+                var userIdString = _jwtService.GetTokenUsersId(token);
+                if (!int.TryParse(userIdString, out var userId))
+                    return Unauthorized("Invalid user id in token.");
+
+                await _companyService.CreateCompanyAsync(company, userId, cancellationToken);
+
+                return Ok(company);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while adding user's company: {ex.Message}");
+                return BadRequest("An error occurred while creating the company.");
+            }
         }
 
         //===========================================Delete==========================================
@@ -142,7 +227,7 @@ namespace TaskFlow.Api.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred in controller while deleting company by id with an exception: {ex.Message}");
-                return StatusCode(500, "An error occurred while processing your request.");
+                return null;
             }
         }
 
@@ -152,9 +237,30 @@ namespace TaskFlow.Api.Controllers
         /// <param name="id">id компании которая будет удалена</param>
         /// <returns></returns>
         [HttpDelete("Delete")]
-        public Task<IActionResult> DeleteCompanyById([FromRoute] int id)
+        public async Task<IActionResult> DeleteCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                var authHeader = Request.Headers["Authorization"].ToString();
+
+                if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
+                    return Unauthorized("Missing or invalid Authorization header.");
+
+                var token = authHeader["Bearer ".Length..].Trim();
+
+                var userIdString = _jwtService.GetTokenUsersId(token);
+                if (!int.TryParse(userIdString, out var userId))
+                    return Unauthorized("Invalid user id in token.");
+
+                await _companyService.DeleteUsersCompanyByIdAsync(id, userId, cancellationToken);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while deleting user's company: {ex.Message}");
+                return BadRequest("An error occurred while deliting the company.");
+            }
         }
         //===========================================Update==========================================
 
@@ -168,7 +274,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateForAdmin([FromBody] CompanyUpdateDto company, CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                var companyId = await _companyService.UpdateCompanyByIdAsync(company, cancellationToken);
+                return Ok(companyId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while updating the company: {ex.Message}");
+                return null;
+            }
         }
 
 
@@ -179,9 +294,18 @@ namespace TaskFlow.Api.Controllers
         /// <param name="copmany"></param>
         /// <returns></returns>
         [HttpPut("Update")]
-        public Task<IActionResult> Update([FromBody] CompanyUpdateDto copmany)
+        public async Task<IActionResult> Update([FromBody] CompanyOfUserUpdateDto company, CancellationToken cancellationToken)
         {
-            return null;
+            try
+            {
+                await _companyService.UpdateUsersCompanyByIdAsync(company, cancellationToken);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while updating the company: {ex.Message}");
+                return null;
+            }
         }
     }
 }
