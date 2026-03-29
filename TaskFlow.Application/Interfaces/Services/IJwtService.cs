@@ -10,7 +10,7 @@ namespace TaskFlow.Application.Interfaces.Services
 {
     public interface IJwtService
     {
-        string GenerateAccessToken(UserEntity user);
+        string GenerateAccessToken(UserEntity user, CompanyUserEntity companyUser);
         Task<RefreshTokenEntity> GenerateRefreshTokenAsync(int userId);
         Task<RefreshTokenEntity?> GetRefreshTokenAsync(string token);
         Task RevokeRefreshTokenAsync(string token);

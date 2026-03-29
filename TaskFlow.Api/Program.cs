@@ -8,10 +8,12 @@ using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Text;
 using TaskFlow.Api.ExceptionHandlers;
+using TaskFlow.Application.AuthorizationRequirements;
 using TaskFlow.Application.Interfaces.Helpers;
 using TaskFlow.Application.Interfaces.Repositories;
 using TaskFlow.Application.Interfaces.Services;
 using TaskFlow.Application.Services;
+using TaskFlow.Domain.Enums;
 using TaskFlow.Infrastructure.Configurations;
 using TaskFlow.Infrastructure.Data;
 using TaskFlow.Infrastructure.Helpers;
@@ -106,7 +108,7 @@ namespace TaskFlow.Api
                 }
             });
             });
-
+            
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -130,15 +132,19 @@ namespace TaskFlow.Api
                 };
             });
 
-            builder.Services.AddAuthorization();
-
-
-            //==================Redis============================
-            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            builder.Services.AddAuthorization(options =>
             {
-                var config = builder.Configuration.GetConnectionString("Redis");
-                return ConnectionMultiplexer.Connect(config);
+                options.AddPolicy(nameof(CompanyRole.Owner), policy =>
+                    policy.Requirements.Add(new CompanyRequirementRoles(
+                        new[] { CompanyRole.Owner }
+                        )));
+                options.AddPolicy(nameof(CompanyRole.Manager), policy =>
+                    policy.Requirements.Add(new CompanyRequirementRoles(
+                        new[] { CompanyRole.Owner, CompanyRole.Manager }
+                        )));
             });
+
+            builder.Services.AddAuthorization();
             //====================React=============================
             builder.Services.AddCors(options =>
             {

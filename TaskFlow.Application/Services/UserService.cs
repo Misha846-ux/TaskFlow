@@ -315,7 +315,7 @@ namespace TaskFlow.Application.Services
             }
         }
 
-        public async Task<string> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
+        public async Task<string> RefreshAsync(string refreshToken, int companyId, CancellationToken cancellationToken)
         {
             try
             {
@@ -329,11 +329,16 @@ namespace TaskFlow.Application.Services
                     throw new Exception("The token's lifetime has expired");
                 }
                 UserEntity user = await _userRepository.GetUserByIdAsync(token.UserId.Value, cancellationToken);
-                return _tokenService.GenerateAccessToken(user);
+                CompanyUserEntity company = user.Companies.SingleOrDefault(c => c.CompanyId == companyId);
+                if(company == null)
+                {
+                    throw new Exception("User is not a the user is not part of the company");
+                }
+                return _tokenService.GenerateAccessToken(user, company);
             }
             catch (OperationCanceledException oex)
             {
-                throw new Exception("User Sevice: RefreshAsync operation were canceled");
+                throw new Exception("User Sevice: RefreshAsync operation were canceled", oex);
             }
             catch (Exception ex)
             {

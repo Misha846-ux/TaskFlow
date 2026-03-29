@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using TaskFlow.Application.Interfaces.Repositories;
 using TaskFlow.Application.Interfaces.Services;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Domain.Enums;
 using TaskFlow.Infrastructure.Configurations;
 using TaskFlow.Infrastructure.Data;
 
@@ -31,13 +32,14 @@ namespace TaskFlow.Infrastructure.Services
             _handler = new JwtSecurityTokenHandler();
         }
 
-        public string GenerateAccessToken(UserEntity user)
+        public string GenerateAccessToken(UserEntity user, CompanyUserEntity companyUser)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.GlobalRole.ToString())
+                new Claim(ClaimTypes.Role, user.GlobalRole.ToString()),
+                new Claim(nameof(CompanyRole), companyUser.CompanyRole.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));

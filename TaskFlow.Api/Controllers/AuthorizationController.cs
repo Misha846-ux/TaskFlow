@@ -31,11 +31,19 @@ namespace TaskFlow.Api.Controllers
             });
             return Ok();
         }
+        /// <summary>
+        /// Мы предпологаем что когда пользователь хочет получит AccessToken он в обзательном порядке
+        /// находится в какой то компании будь то его базовая или какая то другая. При переходе во вкладку 
+        /// другой компании AccessToken становится не валидным и фронтенд должен запросить новый
+        /// </summary>
+        /// <param name="companyId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpPost("Refresh")]
-        public async Task<IActionResult> RefreshAccessToken(CancellationToken cancellationToken)
+        public async Task<IActionResult> RefreshAccessToken(int companyId, CancellationToken cancellationToken)
         {
             Request.Cookies.TryGetValue("refreshToken", out string Refreshtoken);
-            string accessToken = await _userService.RefreshAsync(Refreshtoken, cancellationToken);
+            string accessToken = await _userService.RefreshAsync(Refreshtoken, companyId, cancellationToken);
             return Ok(accessToken);     
         }
 
