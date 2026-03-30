@@ -22,6 +22,21 @@ namespace TaskFlow.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ProjectEntityUserEntity", b =>
+                {
+                    b.Property<int>("ProjectsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("ProjectEntityUserEntity");
+                });
+
             modelBuilder.Entity("TaskFlow.Domain.Entities.ChangeEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -130,32 +145,6 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("TaskFlow.Domain.Entities.ProjectUserEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProjectRole")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ProjectUsers");
-                });
-
             modelBuilder.Entity("TaskFlow.Domain.Entities.RefreshTokenEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -177,15 +166,10 @@ namespace TaskFlow.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserEntityId")
-                        .HasColumnType("int");
-
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserEntityId");
 
                     b.HasIndex("UserId");
 
@@ -291,6 +275,21 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("ProjectEntityUserEntity", b =>
+                {
+                    b.HasOne("TaskFlow.Domain.Entities.ProjectEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaskFlow.Domain.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TaskFlow.Domain.Entities.ChangeEntity", b =>
                 {
                     b.HasOne("TaskFlow.Domain.Entities.UserEntity", "User")
@@ -332,33 +331,10 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
-            modelBuilder.Entity("TaskFlow.Domain.Entities.ProjectUserEntity", b =>
-                {
-                    b.HasOne("TaskFlow.Domain.Entities.ProjectEntity", "Project")
-                        .WithMany("Users")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaskFlow.Domain.Entities.UserEntity", "User")
-                        .WithMany("Projects")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TaskFlow.Domain.Entities.RefreshTokenEntity", b =>
                 {
                     b.HasOne("TaskFlow.Domain.Entities.UserEntity", "User")
                         .WithMany("RefreshTokens")
-                        .HasForeignKey("UserEntityId");
-
-                    b.HasOne("TaskFlow.Domain.Entities.UserEntity", "User")
-                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -393,8 +369,6 @@ namespace TaskFlow.Infrastructure.Migrations
             modelBuilder.Entity("TaskFlow.Domain.Entities.ProjectEntity", b =>
                 {
                     b.Navigation("Tasks");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.UserEntity", b =>
@@ -402,8 +376,6 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.Navigation("Changes");
 
                     b.Navigation("Companies");
-
-                    b.Navigation("Projects");
 
                     b.Navigation("RefreshTokens");
 

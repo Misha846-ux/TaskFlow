@@ -28,7 +28,7 @@ namespace TaskFlow.Infrastructure.Configurations.DbConfigurations
                 .IsRequired();
 
             builder.HasOne(x => x.User)
-                .WithMany()
+                .WithMany(x => x.RefreshTokens)
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
