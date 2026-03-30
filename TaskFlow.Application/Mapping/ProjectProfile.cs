@@ -19,8 +19,8 @@ namespace TaskFlow.Application.Mapping
                 .ForMember(dest => dest.Tasks, opt => opt.Ignore());
 
             CreateMap<ProjectEntity, ProjectGetDto>()
-                .ForMember(dest => dest.UsersId, opt => opt.MapFrom(src => src.Users.Select(u => u.UserId)))
-                .ForMember(dest => dest.TasksId, opt => opt.MapFrom(src => src.Tasks.Select(t => t.Id)));
+                .ForMember(dest => dest.UsersId, opt => opt.MapFrom(src => src.Users == null ? new List<int>() : src.Users.Select(u => u.Id).ToList()))
+                .ForMember(dest => dest.TasksId, opt => opt.MapFrom(src => src.Tasks == null ? new List<int>() : src.Tasks.Select(t => t.Id).ToList()));
             CreateMap<ProjectUpdateDto, ProjectEntity>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.CompanyId, opt => opt.Ignore())

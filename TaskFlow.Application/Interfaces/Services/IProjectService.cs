@@ -16,7 +16,7 @@ namespace TaskFlow.Application.Interfaces.Services
         /// <param name="dto"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<int?> CreateProjectAsync(ProjectPostDto dto, CancellationToken cancellationToken);
+        Task<int?> CreateProjectAsync(ProjectPostDto dto, int currentUserId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Returns a project by id.
@@ -27,12 +27,12 @@ namespace TaskFlow.Application.Interfaces.Services
         Task<ProjectGetDto?> GetProjectByIdAsync(int id, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Returns a project by name.
+        /// Returns projects by name.
         /// </summary>
         /// <param name="name"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<ProjectGetDto?> GetProjectByNameAsync(string name, CancellationToken cancellationToken);
+        Task<ICollection<ProjectGetDto>> GetProjectByNameAsync(string name, CancellationToken cancellationToken);
 
         /// <summary>
         /// Returns all projects.
@@ -115,10 +115,11 @@ namespace TaskFlow.Application.Interfaces.Services
         /// <summary>
         /// Removes a user from a project.
         /// </summary>
-        /// <param name="projectUserId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<int?> RemoveUserFromProjectAsync(int projectUserId, CancellationToken cancellationToken);
+        Task<int?> RemoveUserFromProjectAsync(int projectId, int userId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes a project by id.

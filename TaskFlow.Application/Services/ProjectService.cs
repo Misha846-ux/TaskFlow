@@ -17,21 +17,37 @@ namespace TaskFlow.Application.Services
     public class ProjectService : IProjectService
     {
         private readonly IProjectRepository _projectRepository;
+        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly ICachingService _cacheService;
 
-        public ProjectService(IProjectRepository projectRepository, IMapper mapper, ICachingService cacheService)
+        public ProjectService(IProjectRepository projectRepository, ICompanyRepository companyRepository, IMapper mapper, ICachingService cacheService)
         {
             _projectRepository = projectRepository;
+            _companyRepository = companyRepository;
             _mapper = mapper;
             _cacheService = cacheService;
         }
 
-        public async Task<int?> CreateProjectAsync(ProjectPostDto dto, CancellationToken cancellationToken)
+        public async Task<int?> CreateProjectAsync(ProjectPostDto dto, int currentUserId, CancellationToken cancellationToken)
         {
             if (dto == null)
             {
                 throw new BadRequestException("Project data is required");
+            }
+            var company = await _companyRepository.GetCompanyByIdAsync(dto.CompanyId, cancellationToken);
+            if (company == null)
+            {
+                throw new NotFoundException($"Company with id {dto.CompanyId} not found");
+            }
+            var companyUser = company.Users?.FirstOrDefault(cu => cu.UserId == currentUserId);
+            if (companyUser == null)
+            {
+                throw new ForbiddenException("User does not belong to the company");
+            }
+            if (companyUser.CompanyRole == CompanyRole.Employee)
+            {
+                throw new ForbiddenException("Employee cannot create a project");
             }
             var entity = _mapper.Map<ProjectEntity>(dto);
             var createdId = await _projectRepository.CreateProjectAsync(entity, cancellationToken);
@@ -60,21 +76,21 @@ namespace TaskFlow.Application.Services
             return dto;
         }
 
-        public async Task<ProjectGetDto?> GetProjectByNameAsync(string name, CancellationToken cancellationToken)
+        public async Task<ICollection<ProjectGetDto>> GetProjectByNameAsync(string name, CancellationToken cancellationToken)
         {
-            var cache = await _cacheService.GetAsync<ProjectGetDto>($"Projects:admin:name:{name}");
+            var cache = await _cacheService.GetAsync<ICollection<ProjectGetDto>>($"Projects:admin:name:{name}");
             if (cache != null)
             {
                 return cache;
             }
-            var entity = await _projectRepository.GetProjectByNameAsync(name, cancellationToken);
-            if (entity == null)
+            var entities = await _projectRepository.GetProjectsByNameAsync(name, cancellationToken);
+            if (entities == null || !entities.Any())
             {
-                throw new NotFoundException($"Project with name '{name}' not found");
+                return new List<ProjectGetDto>();
             }
-            var dto = _mapper.Map<ProjectGetDto>(entity);
-            await _cacheService.SetAsync($"Projects:admin:name:{name}", dto, null);
-            return dto;
+            var dtos = _mapper.Map<ICollection<ProjectGetDto>>(entities);
+            await _cacheService.SetAsync($"Projects:admin:name:{name}", dtos, null);
+            return dtos;
         }
 
         public async Task<ICollection<ProjectGetDto>> GetAllProjectsAsync(CancellationToken cancellationToken)
@@ -161,34 +177,40 @@ namespace TaskFlow.Application.Services
             {
                 throw new BadRequestException("Project data is required");
             }
-            var project = await _projectRepository.GetProjectByIdAsync(id, cancellationToken);
-            if (project == null)
+            var existingProject = await _projectRepository.GetProjectByIdAsync(id, cancellationToken);
+            if (existingProject == null)
             {
                 throw new NotFoundException($"Project with id {id} not found");
             }
-            var entity = _mapper.Map<ProjectEntity>(dto);
-            entity.Id = id;
-            var result = await _projectRepository.UpdateProjectAsync(entity, cancellationToken);
+            existingProject.Title = dto.Title ?? existingProject.Title;
+            var result = await _projectRepository.UpdateProjectAsync(existingProject, cancellationToken);
             if (result != null)
             {
                 await _cacheService.RemoveAsync($"Projects:admin:id:{id}");
                 await _cacheService.RemoveAsync("Projects:admin:list");
+                await _cacheService.RemoveAsync($"Projects:admin:company:{existingProject.CompanyId}");
             }
             return result?.Id;
         }
 
         public async Task<int?> AddUserToProjectAsync(int projectId, int userId, CancellationToken cancellationToken)
         {
-            var projectUser = new ProjectUserEntity
+            var project = await _projectRepository.GetProjectByIdAsync(projectId, cancellationToken);
+            if (project == null)
             {
-                ProjectId = projectId,
-                UserId = userId
-            };
-            var result = await _projectRepository.AddUserToProjectAsync(projectUser, cancellationToken);
+                throw new NotFoundException($"Project with id {projectId} not found");
+            }
+            if (project.Users?.Any(u => u.Id == userId) == true)
+            {
+                throw new BadRequestException($"User with id {userId} is already added to project {projectId}");
+            }
+            var result = await _projectRepository.AddUserToProjectAsync(userId, projectId, cancellationToken);
             if (result != null)
             {
                 await _cacheService.RemoveAsync($"Projects:user:{userId}:list");
                 await _cacheService.RemoveAsync($"Projects:{projectId}:users");
+                await _cacheService.RemoveAsync("Projects:admin:list");
+                await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}");
             }
             return result;
         }
@@ -201,23 +223,30 @@ namespace TaskFlow.Application.Services
                 return cache;
             }
             var projectUsers = await _projectRepository.GetProjectUsersAsync(projectId, cancellationToken);
-            var dtos = _mapper.Map<ICollection<UserGetDto>>(projectUsers?.Select(pu => pu.User) ?? new List<UserEntity>());
+            var dtos = _mapper.Map<ICollection<UserGetDto>>(projectUsers ?? new List<UserEntity>());
             await _cacheService.SetAsync($"Projects:{projectId}:users", dtos, null);
             return dtos;
         }
 
-        public async Task<int?> RemoveUserFromProjectAsync(int projectUserId, CancellationToken cancellationToken)
+        public async Task<int?> RemoveUserFromProjectAsync(int projectId, int userId, CancellationToken cancellationToken)
         {
-            var projectUser = await _projectRepository.GetProjectUserByIdAsync(projectUserId, cancellationToken);
-            if (projectUser == null)
+            var project = await _projectRepository.GetProjectByIdAsync(projectId, cancellationToken);
+            if (project == null)
             {
-                throw new NotFoundException($"ProjectUser with id {projectUserId} not found");
+                throw new NotFoundException($"Project with id {projectId} not found");
             }
-            var result = await _projectRepository.RemoveUserFromProjectAsync(projectUserId, cancellationToken);
+            var isInProject = project.Users?.Any(u => u.Id == userId) ?? false;
+            if (!isInProject)
+            {
+                throw new NotFoundException($"User with id {userId} not found in project {projectId}");
+            }
+            var result = await _projectRepository.RemoveUserFromProjectAsync(userId, projectId, cancellationToken);
             if (result != null)
             {
-                await _cacheService.RemoveAsync($"Projects:user:{projectUser.UserId}:list");
-                await _cacheService.RemoveAsync($"Projects:{projectUser.ProjectId}:users");
+                await _cacheService.RemoveAsync($"Projects:user:{userId}:list");
+                await _cacheService.RemoveAsync($"Projects:{projectId}:users");
+                await _cacheService.RemoveAsync("Projects:admin:list");
+                await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}");
             }
             return result;
         }

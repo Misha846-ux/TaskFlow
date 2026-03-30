@@ -22,6 +22,11 @@ namespace TaskFlow.Api.Controllers
             _service = service;
         }
 
+        /// <summary>
+        /// Helper method to get the user ID from the claims.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         private int GetUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -41,7 +46,8 @@ namespace TaskFlow.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ProjectPostDto dto, CancellationToken cancellationToken)
         {
-            var projectId = await _service.CreateProjectAsync(dto, cancellationToken);
+            int userId = GetUserId();
+            var projectId = await _service.CreateProjectAsync(dto, userId, cancellationToken);
             if (projectId == null)
             {
                 return BadRequest();
@@ -105,12 +111,12 @@ namespace TaskFlow.Api.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetByName(string name, CancellationToken cancellationToken)
         {
-            var project = await _service.GetProjectByNameAsync(name, cancellationToken);
-            if (project == null)
+            var projects = await _service.GetProjectByNameAsync(name, cancellationToken);
+            if (projects == null || projects.Count == 0)
             {
                 return NotFound();
             }
-            return Ok(project);
+            return Ok(projects);
         }
 
         /// <summary>
@@ -209,11 +215,11 @@ namespace TaskFlow.Api.Controllers
         /// <param name="projectUserId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        [HttpDelete("{projectUserId}/users")]
+        [HttpDelete("{projectId}/users/{userId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> RemoveUserFromProject(int projectUserId, CancellationToken cancellationToken)
+        public async Task<IActionResult> RemoveUserFromProject(int projectId, int userId, CancellationToken cancellationToken)
         {
-            var result = await _service.RemoveUserFromProjectAsync(projectUserId, cancellationToken);
+            var result = await _service.RemoveUserFromProjectAsync(projectId, userId, cancellationToken);
             if (result == null)
             {
                 return NotFound();
