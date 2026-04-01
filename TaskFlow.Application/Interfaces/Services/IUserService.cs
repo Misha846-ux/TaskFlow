@@ -40,7 +40,7 @@ namespace TaskFlow.Application.Interfaces.Services
         Task<RefreshTokenEntity> LoginWithPasswordAsync(UserLoginDto loginDto, CancellationToken cancellationToken);
         Task<RefreshTokenEntity> LoginWithRecoveryTokenAsync(UserLoginDto userLoginDto, CancellationToken cancellationToken);
         Task<string> RefreshAsync(string refreshToken, int companyId, CancellationToken cancellationToken);
-
+        Task<UserGetDto> GetUserByRefreshToken(string refreshToken, CancellationToken cancellationToken);
         /// <summary>
         /// Returns false if a user with this email address was not found. 
         /// Returns true and creates a token if the user was found.

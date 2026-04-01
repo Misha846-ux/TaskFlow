@@ -63,7 +63,7 @@ namespace TaskFlow.Infrastructure.Services
             try
             {
                 var json = JsonSerializer.Serialize(value);
-                await _database.StringSetAsync(key, json, exp ?? _time);
+                await _database.StringSetAsync(key, json, exp ?? TimeSpan.FromMinutes(5));
             }
             catch (OperationCanceledException oex)
             {
@@ -71,7 +71,7 @@ namespace TaskFlow.Infrastructure.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("RedisCache Service: Problem with SetAsync");
+                throw new Exception("RedisCache Service: Problem with SetAsync", ex);
             }
         }
     }

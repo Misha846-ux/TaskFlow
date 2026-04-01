@@ -3,13 +3,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Interfaces.Services;
+using TaskFlow.Application.Services;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Infrastructure.Services;
 
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AuthorizationController(IUserService _userService): ControllerBase
+    public class AuthorizationController(IUserService _userService, ICompanyService _companyService): ControllerBase
     {
         [HttpPost("SingUp")]
         public async Task<IActionResult> CreateAccaunt([FromBody]UserPostDto user, CancellationToken cancellationToken)
@@ -76,6 +78,25 @@ namespace TaskFlow.Api.Controllers
                 Expires = token.Expires
             });
             return Ok();
+        }
+
+
+        [HttpGet("MyCompanies")]
+        public async Task<IActionResult> GetAllMyComapniesForAuthorization(CancellationToken cancellationToken)
+        {
+            try
+            {
+                Request.Cookies.TryGetValue("refreshToken", out string Refreshtoken);
+                UserGetDto user = await _userService.GetUserByRefreshToken(Refreshtoken, cancellationToken);
+                var companies = await _companyService.GetUsersCompaniesAsync(user.Id, cancellationToken);
+
+                return Ok(companies);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while getting user's companies: {ex.Message}");
+                return BadRequest("An error occurred while getting the company.");
+            }
         }
 
     }

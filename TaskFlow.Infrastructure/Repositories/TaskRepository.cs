@@ -22,7 +22,8 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             try
             {
-                await _context.Tasks.AddAsync(task);
+                await _context.Tasks.AddAsync(task, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
                 return task.Id;
             }
             catch (OperationCanceledException oex)

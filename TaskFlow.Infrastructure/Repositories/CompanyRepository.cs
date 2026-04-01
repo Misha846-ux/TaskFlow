@@ -24,6 +24,7 @@ namespace TaskFlow.Infrastructure.Repositories
             try
             {
                 await _context.Companies.AddAsync(company, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
                 await _context.CompanyUsers.AddAsync(new CompanyUserEntity
                 {
                     CompanyId = company.Id,
@@ -143,7 +144,7 @@ namespace TaskFlow.Infrastructure.Repositories
                 return await _context.Companies
                     .Include(c => c.Projects)
                     .Include(c => c.Users)
-                    .Where(c => c.Users.Any(u => u.Id == userId))
+                    .Where(c => c.Users.Any(u => u.UserId == userId))
                     .ToListAsync(cancellationToken);
             }
             catch (OperationCanceledException oex)
@@ -170,7 +171,7 @@ namespace TaskFlow.Infrastructure.Repositories
                     .OrderBy(c => c.Id)
                     .Skip((side - 1) * count)
                     .Take(count)
-                    .Where (c => c.Users.Any(u => u.Id == userId))
+                    .Where (c => c.Users.Any(u => u.UserId == userId))
                     .ToListAsync(cancellationToken);
             }
             catch (OperationCanceledException oex)

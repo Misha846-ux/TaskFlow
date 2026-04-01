@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
 using System.Threading;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.DTOs.ComapniesDTOs;
 using TaskFlow.Application.Interfaces.Services;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -65,16 +66,7 @@ namespace TaskFlow.Api.Controllers
         {
             try
             {
-                var authHeader = Request.Headers["Authorization"].ToString();
-
-                if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
-                    return Unauthorized("Missing or invalid Authorization header.");
-
-                var token = authHeader["Bearer ".Length..].Trim();
-
-                var userIdString = _jwtService.GetTokenUsersId(token);
-                if (!int.TryParse(userIdString, out var userId))
-                    return Unauthorized("Invalid user id in token.");
+                int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
                 var companies = await _companyService.GetUsersCompaniesAsync(userId, cancellationToken);
 

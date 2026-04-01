@@ -240,6 +240,7 @@ namespace TaskFlow.Infrastructure.Repositories
                     .Where(c => c.CompanyId == project.CompanyId)
                     .Where(c => c.CompanyRole == Domain.Enums.CompanyRole.Owner)
                     .ToListAsync(cancellationToken);
+                project.Users = new List<UserEntity>();
                 foreach (var user in owner)
                 {
                     project.Users.Add(user.User);

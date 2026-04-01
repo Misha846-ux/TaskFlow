@@ -24,9 +24,10 @@ namespace TaskFlow.Application.Services
         private readonly IMapper _mapper;
         private readonly ICachingService _cacheService;
         private readonly IJwtService _tokenService;
+        private readonly ICompanyRepository _companyRepository;
 
         public UserService(IUserRepository userRepository, IMapper mapper, IHashHelper hashHelper
-            , IJwtService tokenService, ICachingService cacheService) //IRefreshTokenRepository refreshTokenRepository)
+            , IJwtService tokenService, ICachingService cacheService, ICompanyRepository companyRepository) //IRefreshTokenRepository refreshTokenRepository)
         {
             _userRepository = userRepository;
             _hashHelper = hashHelper;
@@ -34,6 +35,7 @@ namespace TaskFlow.Application.Services
             _tokenService = tokenService;
             //_refreshTokenRepository = refreshTokenRepository;
             _cacheService = cacheService;
+            _companyRepository = companyRepository;
 
         }
 
@@ -74,7 +76,14 @@ namespace TaskFlow.Application.Services
                 await _cacheService.RemoveAsync($"Users:id:{user.Id}");
                 await _cacheService.RemoveAsync($"Users:name:{user.UserName}");
                 user.Email = user.Email.Trim();
-                return await _userRepository.AddUserAsync(user, userPostDto.Password, cancellationToken);
+                int? userId = await _userRepository.AddUserAsync(user, userPostDto.Password, cancellationToken);
+
+                CompanyEntity userBaseCompany = new CompanyEntity
+                {
+                    Name = $"{user.UserName}+{user.Id}Personal company"
+                };
+                await _companyRepository.AddCompanyAsync(userBaseCompany, userId.Value, cancellationToken);
+                return userId;
             }
             catch (OperationCanceledException oex)
             {
@@ -176,6 +185,33 @@ namespace TaskFlow.Application.Services
             catch (Exception ex)
             {
                 throw new Exception("User Service: Problem with GetUserByIdAsync");
+            }
+        }
+
+        public async Task<UserGetDto> GetUserByRefreshToken(string refreshToken, CancellationToken cancellationToken)
+        {
+            try
+            {
+                RefreshTokenEntity token = await _tokenService.GetRefreshTokenAsync(refreshToken);
+                if (token == null)
+                {
+                    throw new Exception("Token not found");
+                }
+                else if (token.Expires <= DateTime.Now)
+                {
+                    throw new Exception("The token's lifetime has expired");
+                }
+                UserEntity user = await _userRepository.GetUserByIdAsync(token.UserId.Value, cancellationToken);
+
+                return _mapper.Map<UserGetDto>(user);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Sevice: GetUserByRefreshToken operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Service: Problem with GetUserByRefreshToken");
             }
         }
 
@@ -287,7 +323,7 @@ namespace TaskFlow.Application.Services
                 {
                     throw new UnauthorizedAccessException();
                 }
-                else if (user.RecoveryTokenLifeTime <= DateTime.Now)
+                else if (user.RecoveryTokenLifeTime >= DateTime.Now)
                 {
                     throw new UnauthorizedAccessException();
                 }
