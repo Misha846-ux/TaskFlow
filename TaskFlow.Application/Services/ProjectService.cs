@@ -276,7 +276,7 @@ namespace TaskFlow.Application.Services
             if (result != null)
             {
                 await _cacheService.RemoveAsync($"Projects:admin:id:{id}");
-                await _cacheService.RemoveAsync("Projects:admin);
+                await _cacheService.RemoveAsync("Projects:admin");
                 await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}");
                 await _cacheService.RemoveAsync($"Projects:admin:pagination");
                 await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}:pagination");

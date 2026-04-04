@@ -223,12 +223,12 @@ namespace TaskFlow.Application.Services
         {
             try
             {
-                var cache = await _cacheService.GetAsync<ICollection<UserGetDto>>($"Users:name:{name.ToLower()}:{count}:{side}");
+                var cache = await _cacheService.GetAsync<ICollection<UserGetDto>>($"Users:name:{name.ToLower()}");
                 if (cache == null)
                 {
                     ICollection<UserEntity> users = await _userRepository.GetUsersByNameAsync(name, cancellationToken);
                     cache = _mapper.Map<ICollection<UserGetDto>>(users);
-                    await _cacheService.SetAsync($"Users:name:{name.ToLower()}:{count}:{side}", cache, null);
+                    await _cacheService.SetAsync($"Users:name:{name.ToLower()}", cache, null);
                 }
                 return cache;
             }
@@ -246,12 +246,12 @@ namespace TaskFlow.Application.Services
         {
             try
             {
-                var cache = await _cacheService.GetAsync<ICollection<UserGetDto>>($"Users:name:pagination:{name.ToLower()}");
+                var cache = await _cacheService.GetAsync<ICollection<UserGetDto>>($"Users:name:pagination:{name.ToLower()}:{count}:{side}");
                 if (cache == null)
                 {
                     ICollection<UserEntity> users = await _userRepository.GetUsersByNamePaginationAsync(name, count, side, cancellationToken);
                     cache = _mapper.Map<ICollection<UserGetDto>>(users);
-                    await _cacheService.SetAsync($"Users:name:pagination:{name.ToLower()}", cache, null);
+                    await _cacheService.SetAsync($"Users:name:pagination:{name.ToLower()}:{count}:{side}", cache, null);
                 }
                 return cache;
             }
