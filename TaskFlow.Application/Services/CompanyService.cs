@@ -30,11 +30,8 @@ public class CompanyService : ICompanyService
     {
         try
         {
-            // Delete the cache for companies if it exists
-            if (await _cachingService.GetAsync<ICollection<CompanyGetDto>>("Companies") != null)
-            {
-                await _cachingService.RemoveAsync("Companies");
-            }
+            await _cachingService.RemoveAsync("Companies");
+            
             if (dto == null) throw new ArgumentNullException(nameof(dto));
 
             var company = _mapper.Map<CompanyEntity>(dto);
@@ -140,11 +137,8 @@ public class CompanyService : ICompanyService
     public async Task<int?> DeleteCompanyByIdAsync(int id, CancellationToken cancellationToken)
     {
         try
-        {
-            if(await _cachingService.GetAsync<ICollection<CompanyGetDto>>("Companies") != null)
-            {
-                await _cachingService.RemoveAsync("Companies");
-            }
+        { 
+            await _cachingService.RemoveAsync("Companies");
 
             return await _companyRepository.DeleteCompanyByIdAsync(id, cancellationToken);
         }
@@ -165,10 +159,9 @@ public class CompanyService : ICompanyService
             if (company.Users.Any(u =>u.UserId == userId && u.CompanyRole.ToString() == "Owner"))
             {
 
-                if (await _cachingService.GetAsync<ICollection<CompanyGetDto>>("Companies") != null)
-                {
-                    await _cachingService.RemoveAsync("Companies");
-                }
+                
+                await _cachingService.RemoveAsync("Companies");
+                
 
                 return await _companyRepository.DeleteCompanyByIdAsync(id, cancellationToken);
             }
@@ -212,6 +205,7 @@ public class CompanyService : ICompanyService
     {
         try
         {
+            await _cachingService.RemoveAsync("Companies");
             var company = _mapper.Map<CompanyEntity>(dto);
             await _companyRepository.UpdateCompanyAsync(company, cancellationToken);
             return company.Id;
@@ -228,6 +222,7 @@ public class CompanyService : ICompanyService
     {
         try
         {
+            await _cachingService.RemoveAsync("Companies");
             var company = _mapper.Map<CompanyUserEntity>(companyDto);
             await _companyRepository.UpdateCompanyUserAsync(company, cancellationToken);
         }

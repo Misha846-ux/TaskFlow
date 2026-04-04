@@ -11,6 +11,7 @@ using TaskFlow.Domain.Enums;
 using AutoMapper;
 using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Exceptions;
+using System.ComponentModel.Design;
 
 namespace TaskFlow.Application.Services
 {
@@ -53,8 +54,11 @@ namespace TaskFlow.Application.Services
             var createdId = await _projectRepository.CreateProjectAsync(entity, cancellationToken);
             if (createdId != null)
             {
-                await _cacheService.RemoveAsync("Projects:admin:list");
+                await _cacheService.RemoveAsync("Projects:admin");
                 await _cacheService.RemoveAsync($"Projects:admin:company:{dto.CompanyId}");
+                await _cacheService.RemoveAsync($"Projects:admin:pagination");
+                await _cacheService.RemoveAsync($"Projects:admin:company:{dto.CompanyId}:pagination");
+                await _cacheService.RemoveAsync($"Projects:user:pagination");
             }
             return createdId;
         }
@@ -95,27 +99,27 @@ namespace TaskFlow.Application.Services
 
         public async Task<ICollection<ProjectGetDto>> GetAllProjectsAsync(CancellationToken cancellationToken)
         {
-            var cache = await _cacheService.GetAsync<ICollection<ProjectGetDto>>("Projects:admin:list");
+            var cache = await _cacheService.GetAsync<ICollection<ProjectGetDto>>("Projects:admin");
             if (cache != null)
             {
                 return cache;
             }
             var entities = await _projectRepository.GetAllProjectsAsync(cancellationToken);
             var dtos = _mapper.Map<ICollection<ProjectGetDto>>(entities ?? new List<ProjectEntity>());
-            await _cacheService.SetAsync("Projects:admin:list", dtos, null);
+            await _cacheService.SetAsync("Projects:admin", dtos, null);
             return dtos;
         }
 
         public async Task<ICollection<ProjectGetDto>> GetProjectsPaginationAsync(int count, int side, CancellationToken cancellationToken)
         {
-            var cache = await _cacheService.GetAsync<ICollection<ProjectGetDto>>($"Projects:admin:list:{count}:{side}");
+            var cache = await _cacheService.GetAsync<ICollection<ProjectGetDto>>($"Projects:admin:pagination:{count}:{side}");
             if (cache != null)
             {
                 return cache;
             }
             var entities = await _projectRepository.GetProjectsPaginationAsync(count, side, cancellationToken);
             var dtos = _mapper.Map<ICollection<ProjectGetDto>>(entities ?? new List<ProjectEntity>());
-            await _cacheService.SetAsync($"Projects:admin:list:{count}:{side}", dtos, null);
+            await _cacheService.SetAsync($"Projects:admin:pagination:{count}:{side}", dtos, null);
             return dtos;
         }
 
@@ -134,14 +138,14 @@ namespace TaskFlow.Application.Services
 
         public async Task<ICollection<ProjectGetDto>> GetProjectsByCompanyIdPaginationAsync(int companyId, int count, int side, CancellationToken cancellationToken)
         {
-            var cache = await _cacheService.GetAsync<ICollection<ProjectGetDto>>($"Projects:admin:company:{companyId}:{count}:{side}");
+            var cache = await _cacheService.GetAsync<ICollection<ProjectGetDto>>($"Projects:admin:company:{companyId}:pagination:{count}:{side}");
             if (cache != null)
             {
                 return cache;
             }
             var entities = await _projectRepository.GetProjectsByCompanyIdPaginationAsync(companyId, count, side, cancellationToken);
             var dtos = _mapper.Map<ICollection<ProjectGetDto>>(entities ?? new List<ProjectEntity>());
-            await _cacheService.SetAsync($"Projects:admin:company:{companyId}:{count}:{side}", dtos, null);
+            await _cacheService.SetAsync($"Projects:admin:company:{companyId}:pagination:{count}:{side}", dtos, null);
             return dtos;
         }
 
@@ -160,14 +164,14 @@ namespace TaskFlow.Application.Services
 
         public async Task<ICollection<ProjectGetDto>> GetUserProjectsPaginationAsync(int userId, int count, int side, CancellationToken cancellationToken)
         {
-            var cache = await _cacheService.GetAsync<ICollection<ProjectGetDto>>($"Projects:user:{userId}:list:{count}:{side}");
+            var cache = await _cacheService.GetAsync<ICollection<ProjectGetDto>>($"Projects:user:{userId}:pagination:{count}:{side}");
             if (cache != null)
             {
                 return cache;
             }
             var entities = await _projectRepository.GetUserProjectsPaginationAsync(userId, count, side, cancellationToken);
             var dtos = _mapper.Map<ICollection<ProjectGetDto>>(entities ?? new List<ProjectEntity>());
-            await _cacheService.SetAsync($"Projects:user:{userId}:list:{count}:{side}", dtos, null);
+            await _cacheService.SetAsync($"Projects:user:{userId}:pagination:{count}:{side}", dtos, null);
             return dtos;
         }
 
@@ -187,8 +191,11 @@ namespace TaskFlow.Application.Services
             if (result != null)
             {
                 await _cacheService.RemoveAsync($"Projects:admin:id:{id}");
-                await _cacheService.RemoveAsync("Projects:admin:list");
+                await _cacheService.RemoveAsync("Projects:admin");
                 await _cacheService.RemoveAsync($"Projects:admin:company:{existingProject.CompanyId}");
+                await _cacheService.RemoveAsync($"Projects:admin:pagination");
+                await _cacheService.RemoveAsync($"Projects:admin:company:{existingProject.CompanyId}:pagination");
+                await _cacheService.RemoveAsync($"Projects:user:pagination");
             }
             return result?.Id;
         }
@@ -209,8 +216,12 @@ namespace TaskFlow.Application.Services
             {
                 await _cacheService.RemoveAsync($"Projects:user:{userId}:list");
                 await _cacheService.RemoveAsync($"Projects:{projectId}:users");
-                await _cacheService.RemoveAsync("Projects:admin:list");
+                await _cacheService.RemoveAsync("Projects:admin");
                 await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}");
+                await _cacheService.RemoveAsync($"Projects:admin:pagination");
+                await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}:pagination");
+                await _cacheService.RemoveAsync($"Projects:user:pagination");
+
             }
             return result;
         }
@@ -245,8 +256,11 @@ namespace TaskFlow.Application.Services
             {
                 await _cacheService.RemoveAsync($"Projects:user:{userId}:list");
                 await _cacheService.RemoveAsync($"Projects:{projectId}:users");
-                await _cacheService.RemoveAsync("Projects:admin:list");
+                await _cacheService.RemoveAsync("Projects:admin");
                 await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}");
+                await _cacheService.RemoveAsync($"Projects:admin:pagination");
+                await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}:pagination");
+                await _cacheService.RemoveAsync($"Projects:user:pagination");
             }
             return result;
         }
@@ -262,8 +276,11 @@ namespace TaskFlow.Application.Services
             if (result != null)
             {
                 await _cacheService.RemoveAsync($"Projects:admin:id:{id}");
-                await _cacheService.RemoveAsync("Projects:admin:list");
+                await _cacheService.RemoveAsync("Projects:admin);
                 await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}");
+                await _cacheService.RemoveAsync($"Projects:admin:pagination");
+                await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}:pagination");
+                await _cacheService.RemoveAsync($"Projects:user:pagination");
             }
             return result;
         }
