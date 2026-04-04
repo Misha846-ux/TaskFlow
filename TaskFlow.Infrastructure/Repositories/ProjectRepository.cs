@@ -336,7 +336,8 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             try
             {
-                _context.Projects.Remove(new ProjectEntity { Id = id });
+                ProjectEntity project = await GetProjectByIdAsync(id, cancellationToken);
+                _context.Projects.Remove(project);
                 await _context.SaveChangesAsync(cancellationToken);
                 return id;
             }

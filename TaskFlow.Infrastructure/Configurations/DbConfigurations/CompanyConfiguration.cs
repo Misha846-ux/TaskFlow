@@ -21,9 +21,11 @@ namespace TaskFlow.Infrastructure.Configurations.DbConfigurations
             builder.Property(x => x.CreatedAt)
                 .HasDefaultValueSql("SYSDATETIME()");
 
-            builder.HasMany(c => c.Users).WithOne(u => u.Company).HasForeignKey(u => u.CompanyId);
+            builder.HasMany(c => c.Users).WithOne(u => u.Company)
+                .HasForeignKey(u => u.CompanyId).OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(c => c.Projects).WithOne(p  => p.Company).HasForeignKey(p => p.CompanyId);
+            builder.HasMany(c => c.Projects).WithOne(p  => p.Company)
+                .HasForeignKey(p => p.CompanyId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

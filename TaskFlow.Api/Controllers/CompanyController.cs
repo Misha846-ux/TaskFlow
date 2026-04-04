@@ -118,7 +118,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("ById")]
+        [HttpGet("ById{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
@@ -139,21 +139,12 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("MyCompanyById")]
+        [HttpGet("MyCompanyById{id}")]
         public async Task<IActionResult> GetMyCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
             try
             {
-                var authHeader = Request.Headers["Authorization"].ToString();
-
-                if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
-                    return Unauthorized("Missing or invalid Authorization header.");
-
-                var token = authHeader["Bearer ".Length..].Trim();
-
-                var userIdString = _jwtService.GetTokenUsersId(token);
-                if (!int.TryParse(userIdString, out var userId))
-                    return Unauthorized("Invalid user id in token.");
+                int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
                 var company = await _companyService.GetUsersCompanyByIdAsync(id, userId, cancellationToken);
 
@@ -207,7 +198,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id">id компании которая будет удалена</param>
         /// <returns></returns>
-        [HttpDelete("DeleteForAdmin")]
+        [HttpDelete("DeleteForAdmin{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCompanyByIdForAdmin([FromRoute] int id, CancellationToken cancellationToken)
         {
@@ -228,21 +219,12 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id">id компании которая будет удалена</param>
         /// <returns></returns>
-        [HttpDelete("Delete")]
+        [HttpDelete("Delete{id}")]
         public async Task<IActionResult> DeleteCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
             try
             {
-                var authHeader = Request.Headers["Authorization"].ToString();
-
-                if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
-                    return Unauthorized("Missing or invalid Authorization header.");
-
-                var token = authHeader["Bearer ".Length..].Trim();
-
-                var userIdString = _jwtService.GetTokenUsersId(token);
-                if (!int.TryParse(userIdString, out var userId))
-                    return Unauthorized("Invalid user id in token.");
+                int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
                 await _companyService.DeleteUsersCompanyByIdAsync(id, userId, cancellationToken);
 

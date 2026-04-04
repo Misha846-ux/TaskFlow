@@ -45,7 +45,16 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             try
             {
-                _context.Users.Remove(new UserEntity { Id = id });
+                UserEntity user = await GetUserByIdAsync(id, cancellationToken);
+                ICollection<CompanyEntity> companies = await _context.Companies
+                    .Include(c => c.Users)
+                    .Where(c => c.Users.Any(u => u.UserId == user.Id && u.CompanyRole == Domain.Enums.CompanyRole.Owner))
+                    .ToListAsync(cancellationToken);
+                foreach (CompanyEntity company in companies)
+                {
+                    _context.Companies.Remove(company);
+                }
+                _context.Users.Remove(user);
                 await _context.SaveChangesAsync(cancellationToken);
                 return id;
             }

@@ -66,7 +66,8 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             try
             {
-                _context.Companies.Remove(new CompanyEntity { Id = id });
+                CompanyEntity companyEntity = await GetCompanyByIdAsync(id, cancellationToken);
+                _context.Companies.Remove(companyEntity);
                 await _context.SaveChangesAsync(cancellationToken);
                 return id;
             }

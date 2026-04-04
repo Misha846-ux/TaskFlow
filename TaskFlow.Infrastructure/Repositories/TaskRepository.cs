@@ -40,7 +40,8 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             try
             {
-                _context.Tasks.Remove(new TaskEntity { Id = id});
+                TaskEntity task = await GetTaskByIdAsync(id, cancellationToken);
+                _context.Tasks.Remove(task);
                 await _context.SaveChangesAsync(cancellationToken);
                 return id;
             }
