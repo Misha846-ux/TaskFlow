@@ -11,6 +11,7 @@ using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Interfaces.Repositories;
 using TaskFlow.Application.Interfaces.Services;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Domain.Enums;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TaskFlow.Application.Services
@@ -18,13 +19,17 @@ namespace TaskFlow.Application.Services
     public class TaskService : ITaskService
     {
         private readonly ITaskRepository _repository;
+        private readonly IProjectRepository _projectRepository;
         private readonly IMapper _mapper;
         private readonly ICachingService _cacheService;
-        public TaskService(ITaskRepository repository, IMapper mapper, ICachingService cacheService)
+        private readonly IChangeService _changeService;
+        public TaskService(ITaskRepository repository, IProjectRepository projectRepository, IMapper mapper, ICachingService cacheService, IChangeService changeService)
         {
             _repository = repository;
+            _projectRepository = projectRepository;
             _mapper = mapper;
             _cacheService = cacheService;
+            _changeService = changeService;
         }
         //Method for Task creating
         public async Task<int?> CreateTaskAsync(TaskPostDto dto, CancellationToken cancellationToken)
@@ -36,7 +41,14 @@ namespace TaskFlow.Application.Services
                 await _cacheService.RemoveAsync("Tasks");
                 await _cacheService.RemoveAsync($"Tasks:deadline:{task.ProjectId}:{task.DeadLine:yyyyMMdd}");
                 await _cacheService.RemoveAsync($"Tasks:name:{task.ProjectId}:{task.TaskName.ToLower()}");
-                return await _repository.AddTaskAsync(task, cancellationToken);
+                var createdId = await _repository.AddTaskAsync(task, cancellationToken);
+                if (createdId != null)
+                {
+                    var project = await _projectRepository.GetProjectByIdAsync(task.ProjectId.Value, cancellationToken);
+                    var userIds = project?.Users?.Select(u => u.Id).ToList() ?? new List<int>();
+                    await _changeService.CreateChangeAsync(ChangeTableType.Tasks, createdId.Value, ChangeType.Created, userIds, cancellationToken);
+                }
+                return createdId;
             }
             catch (OperationCanceledException oex)
             {
@@ -65,6 +77,13 @@ namespace TaskFlow.Application.Services
                 await _cacheService.RemoveAsync($"Tasks:status:{task.Status}:{task.ProjectId}");
 
                 var result = await _repository.DeleteTaskByIdAsync(task.Id, cancellationToken);
+
+                if (result != null && result > 0)
+                {
+                    var project = await _projectRepository.GetProjectByIdAsync(task.ProjectId.Value, cancellationToken);
+                    var userIds = project?.Users?.Select(u => u.Id).ToList() ?? new List<int>();
+                    await _changeService.CreateChangeAsync(ChangeTableType.Tasks, task.Id, ChangeType.Deleted, userIds, cancellationToken);
+                }
 
                 return result != null && result > 0;
             }
@@ -281,16 +300,25 @@ namespace TaskFlow.Application.Services
         {
             try
             {
+                var existingTask = await _repository.GetTaskByIdAsync(id, cancellationToken);
+                if (existingTask == null)
+                    return null;
+
                 var entity = _mapper.Map<TaskEntity>(dto);
                 await _cacheService.RemoveAsync("Tasks");
                 await _cacheService.RemoveAsync($"Tasks:id:{id}");
                 await _cacheService.RemoveAsync($"Tasks:deadline:{entity.ProjectId} : {entity.DeadLine:yyyyMMdd}");
                 await _cacheService.RemoveAsync($"Tasks:name:{entity.ProjectId}:{entity.TaskName.ToLower()}");
                 await _cacheService.RemoveAsync($"Tasks:status:{entity.Status}:{entity.ProjectId}");
-                await _repository.UpdateAsync(entity, cancellationToken);
+                var updatedTask = await _repository.UpdateAsync(entity, cancellationToken);
 
-
-                return _mapper.Map<TaskGetDto>(entity);
+                if (updatedTask != null)
+                {
+                    var project = await _projectRepository.GetProjectByIdAsync(existingTask.ProjectId.Value, cancellationToken);
+                    var userIds = project?.Users?.Select(u => u.Id).ToList() ?? new List<int>();
+                    await _changeService.CreateChangeAsync(ChangeTableType.Tasks, id, ChangeType.Updated, userIds, cancellationToken);
+                }
+                return _mapper.Map<TaskGetDto>(updatedTask);
             }
             catch (OperationCanceledException oex)
             {

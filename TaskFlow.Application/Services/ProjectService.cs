@@ -20,13 +20,15 @@ namespace TaskFlow.Application.Services
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly ICachingService _cacheService;
+        private readonly IChangeService _changeService;
 
-        public ProjectService(IProjectRepository projectRepository, ICompanyRepository companyRepository, IMapper mapper, ICachingService cacheService)
+        public ProjectService(IProjectRepository projectRepository, ICompanyRepository companyRepository, IMapper mapper, ICachingService cacheService, IChangeService changeService)
         {
             _projectRepository = projectRepository;
             _companyRepository = companyRepository;
             _mapper = mapper;
             _cacheService = cacheService;
+            _changeService = changeService;
         }
 
         public async Task<int?> CreateProjectAsync(ProjectPostDto dto, int currentUserId, CancellationToken cancellationToken)
@@ -55,6 +57,8 @@ namespace TaskFlow.Application.Services
             {
                 await _cacheService.RemoveAsync("Projects:admin:list");
                 await _cacheService.RemoveAsync($"Projects:admin:company:{dto.CompanyId}");
+                var userIds = company.Users?.Where(cu => cu.UserId.HasValue).Select(cu => cu.UserId.Value).ToList() ?? new List<int>();
+                await _changeService.CreateChangeAsync(ChangeTableType.Projects, createdId.Value, ChangeType.Created, userIds, cancellationToken);
             }
             return createdId;
         }
@@ -189,6 +193,8 @@ namespace TaskFlow.Application.Services
                 await _cacheService.RemoveAsync($"Projects:admin:id:{id}");
                 await _cacheService.RemoveAsync("Projects:admin:list");
                 await _cacheService.RemoveAsync($"Projects:admin:company:{existingProject.CompanyId}");
+                var userIds = existingProject.Users?.Select(u => u.Id).ToList() ?? new List<int>();
+                await _changeService.CreateChangeAsync(ChangeTableType.Projects, id, ChangeType.Updated, userIds, cancellationToken);
             }
             return result?.Id;
         }
@@ -264,6 +270,8 @@ namespace TaskFlow.Application.Services
                 await _cacheService.RemoveAsync($"Projects:admin:id:{id}");
                 await _cacheService.RemoveAsync("Projects:admin:list");
                 await _cacheService.RemoveAsync($"Projects:admin:company:{project.CompanyId}");
+                var userIds = project.Users?.Select(u => u.Id).ToList() ?? new List<int>();
+                await _changeService.CreateChangeAsync(ChangeTableType.Projects, id, ChangeType.Deleted, userIds, cancellationToken);
             }
             return result;
         }
