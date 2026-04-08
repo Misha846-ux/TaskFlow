@@ -41,6 +41,10 @@ namespace TaskFlow.Application.Services
                 await _cacheService.RemoveAsync("Tasks");
                 await _cacheService.RemoveAsync($"Tasks:deadline:{task.ProjectId}:{task.DeadLine:yyyyMMdd}");
                 await _cacheService.RemoveAsync($"Tasks:name:{task.ProjectId}:{task.TaskName.ToLower()}");
+                await _cacheService.RemoveAsync("Tasks:pagination");
+                await _cacheService.RemoveAsync($"Tasks:pagination:{task.ProjectId}");
+                await _cacheService.RemoveAsync($"Tasks:name::pagination:{task.ProjectId}:{task.TaskName.ToLower()}");
+
                 var createdId = await _repository.AddTaskAsync(task, cancellationToken);
                 if (createdId != null)
                 {
@@ -75,6 +79,9 @@ namespace TaskFlow.Application.Services
                 await _cacheService.RemoveAsync($"Tasks:deadline:{task.ProjectId}:{task.DeadLine:yyyyMMdd}");
                 await _cacheService.RemoveAsync($"Tasks:name:{task.ProjectId}:{task.TaskName.ToLower()}");
                 await _cacheService.RemoveAsync($"Tasks:status:{task.Status}:{task.ProjectId}");
+                await _cacheService.RemoveAsync("Tasks:pagination");
+                await _cacheService.RemoveAsync($"Tasks:pagination:{task.ProjectId}");
+                await _cacheService.RemoveAsync($"Tasks:name::pagination:{task.ProjectId}:{task.TaskName.ToLower()}");
 
                 var result = await _repository.DeleteTaskByIdAsync(task.Id, cancellationToken);
 
@@ -130,7 +137,7 @@ namespace TaskFlow.Application.Services
                     var task = await _repository.GetProjectTasksByDeadlineAsync(date, projectId, cancellationToken);
                     if (task == null) return null;
                     cache = _mapper.Map<TaskGetDto>(task);
-                    await _cacheService.SetAsync($"Tasks:deadline:{projectId}:{date}", cache, null);
+                    await _cacheService.SetAsync($"Tasks:deadline:{projectId}:{date:yyyyMMdd}", cache, null);
                 }
                 return cache;
             }
@@ -282,7 +289,7 @@ namespace TaskFlow.Application.Services
 
                     cache = _mapper.Map<ICollection<TaskGetDto>>(task);
 
-                    await _cacheService.SetAsync($"Tasks:name::pagination:{projectId}:{normalizedName}:{count}:{side}", cache, null);
+                    await _cacheService.SetAsync($"Tasks:name:pagination:{projectId}:{normalizedName}:{count}:{side}", cache, null);
                 }
                 return cache;
             }
@@ -307,9 +314,14 @@ namespace TaskFlow.Application.Services
                 var entity = _mapper.Map<TaskEntity>(dto);
                 await _cacheService.RemoveAsync("Tasks");
                 await _cacheService.RemoveAsync($"Tasks:id:{id}");
-                await _cacheService.RemoveAsync($"Tasks:deadline:{entity.ProjectId} : {entity.DeadLine:yyyyMMdd}");
+                await _cacheService.RemoveAsync($"Tasks:deadline:{entity.ProjectId}:{entity.DeadLine:yyyyMMdd}");
                 await _cacheService.RemoveAsync($"Tasks:name:{entity.ProjectId}:{entity.TaskName.ToLower()}");
                 await _cacheService.RemoveAsync($"Tasks:status:{entity.Status}:{entity.ProjectId}");
+                await _cacheService.RemoveAsync("Tasks:pagination");
+                await _cacheService.RemoveAsync($"Tasks:pagination:{entity.ProjectId}");
+                await _cacheService.RemoveAsync($"Tasks:name::pagination:{entity.ProjectId}:{entity.TaskName.ToLower()}");
+                await _repository.UpdateAsync(entity, cancellationToken);
+
                 var updatedTask = await _repository.UpdateAsync(entity, cancellationToken);
 
                 if (updatedTask != null)
