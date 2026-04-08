@@ -272,6 +272,7 @@ namespace TaskFlow.Api.Controllers
         {
             try
             {
+                company.Id = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 await _companyService.UpdateUsersCompanyByIdAsync(company, cancellationToken);
                 return Ok();
             }
