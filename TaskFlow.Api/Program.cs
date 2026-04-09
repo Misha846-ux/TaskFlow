@@ -150,9 +150,10 @@ namespace TaskFlow.Api
             {
                 options.AddPolicy("AllowReact",
                     policy => policy
-                        .WithOrigins("http://localhost:5173/")
+                        .WithOrigins("http://localhost:5173")
                         .AllowAnyHeader()
-                        .AllowAnyMethod());
+                        .AllowAnyMethod()
+                        .AllowCredentials());
             });
             var app = builder.Build();
 

@@ -28,7 +28,7 @@ namespace TaskFlow.Api.Controllers
             {
                 HttpOnly = true,       
                 Secure = true,        
-                SameSite = SameSiteMode.Strict, 
+                SameSite = SameSiteMode.None, 
                 Expires = token.Expires
             });
             return Ok();
