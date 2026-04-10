@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,6 +50,8 @@ namespace TaskFlow.Application.Interfaces.Services
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<string> CreateRecoveryTokenAsync(string email, CancellationToken cancellationToken);
+
+        Task UpdateUserAvatar(int userId, IFormFile file, CancellationToken cancellationToken);
 
     }
 }

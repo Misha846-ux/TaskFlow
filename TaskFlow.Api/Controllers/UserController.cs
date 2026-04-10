@@ -134,5 +134,12 @@ namespace TaskFlow.Api.Controllers
             UserGetDto user = await _userService.UpdateUserForAdminAsync(newUser, cancellationToken);
             return Ok(user);
         }
+
+        [HttpPut("Update/UserAvatar{id}")]
+        public async Task<IActionResult> UpdateUserAvatar([FromBody]IFormFile file, CancellationToken cancellationToken)
+        {
+            int userid = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            throw new Exception("Method not finished");
+        }
     }
 }

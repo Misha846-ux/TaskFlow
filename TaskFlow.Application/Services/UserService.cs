@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using TaskFlow.Application.DTOs.TaskDTOs;
 using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Interfaces.Helpers;
@@ -383,6 +384,34 @@ namespace TaskFlow.Application.Services
             catch (Exception ex)
             {
                 throw new Exception("User Service: Problem with RefreshAsync", ex);
+            }
+        }
+
+        public async Task UpdateUserAvatar(int userId, IFormFile file, CancellationToken cancellationToken)
+        {
+            try
+            {
+                UserEntity user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
+                if(user == null)
+                {
+                    throw new UnauthorizedAccessException();
+                }
+                string fileName = $":{user.Id}:{user.UserName}";
+                string path = Path.Combine("wwwroot", fileName);
+                using (FileStream stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                user.PassToIcon = path;
+                await _userRepository.SaveChages(cancellationToken);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Sevice: UpdateUserAvatar operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Service: Problem with UpdateUserAvatar");
             }
         }
 
