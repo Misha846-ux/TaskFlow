@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -121,6 +122,51 @@ namespace TaskFlow.Api.Controllers
         }
 
         /// <summary>
+        /// Get project by id (Owner/Manager).
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("my/{id}")]
+        [Authorize(Policy = "Manager")]
+        public async Task<IActionResult> GetMyById(int id, CancellationToken cancellationToken)
+        {
+            int userId = GetUserId();
+            var userProjects = await _service.GetUserProjectsAsync(userId, cancellationToken);
+            if (!userProjects.Any(p => p.Id == id))
+            {
+                return NotFound();
+            }
+            var project = await _service.GetProjectByIdAsync(id, cancellationToken);
+            if (project == null)
+            {
+                return NotFound();
+            }
+            return Ok(project);
+        }
+
+        /// <summary>
+        /// Get project by name (Owner/Manager).
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("my/by-name/{name}")]
+        [Authorize(Policy = "Manager")]
+        public async Task<IActionResult> GetMyByName(string name, CancellationToken cancellationToken)
+        {
+            int userId = GetUserId();
+            var userProjects = await _service.GetUserProjectsAsync(userId, cancellationToken);
+            var allProjects = await _service.GetProjectByNameAsync(name, cancellationToken);
+            var filtered = allProjects.Where(p => userProjects.Any(up => up.Id == p.Id)).ToList();
+            if (filtered.Count == 0)
+            {
+                return NotFound();
+            }
+            return Ok(filtered);
+        }
+
+        /// <summary>
         /// Get projects by company id (admin).
         /// </summary>
         /// <param name="companyId"></param>
@@ -211,6 +257,33 @@ namespace TaskFlow.Api.Controllers
         }
 
         /// <summary>
+        /// Add user to project (owner/manager).
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("my/{projectId}/users/{userId}")]
+        [Authorize(Policy = "Manager")]
+        public async Task<IActionResult> AddUserToProjectOwnerManager(int projectId, int userId, CancellationToken cancellationToken)
+        {
+            int currentUserId = GetUserId();
+            var userProjects = await _service.GetUserProjectsAsync(currentUserId, cancellationToken);
+            
+            if (!userProjects.Any(p => p.Id == projectId))
+            {
+                return NotFound();
+            }
+
+            var result = await _service.AddUserToProjectAsync(projectId, userId, cancellationToken);
+            if (result == null)
+            {
+                return BadRequest();
+            }
+            return Ok(new { id = result });
+        }
+
+        /// <summary>
         /// Remove user from project (admin).
         /// </summary>
         /// <param name="projectUserId"></param>
@@ -220,6 +293,33 @@ namespace TaskFlow.Api.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RemoveUserFromProject(int projectId, int userId, CancellationToken cancellationToken)
         {
+            var result = await _service.RemoveUserFromProjectAsync(projectId, userId, cancellationToken);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            return Ok(new { id = result });
+        }
+
+        /// <summary>
+        /// Remove user from project (owner/manager).
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpDelete("my/{projectId}/users/{userId}")]
+        [Authorize(Policy = "Manager")]
+        public async Task<IActionResult> RemoveUserFromProjectOwnerManager(int projectId, int userId, CancellationToken cancellationToken)
+        {
+            int currentUserId = GetUserId();
+            var userProjects = await _service.GetUserProjectsAsync(currentUserId, cancellationToken);
+            
+            if (!userProjects.Any(p => p.Id == projectId))
+            {
+                return NotFound();
+            }
+
             var result = await _service.RemoveUserFromProjectAsync(projectId, userId, cancellationToken);
             if (result == null)
             {
@@ -248,6 +348,33 @@ namespace TaskFlow.Api.Controllers
         }
 
         /// <summary>
+        /// Update project (owner/manager).
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="dto"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPut("my/{id}")]
+        [Authorize(Policy = "Manager")]
+        public async Task<IActionResult> UpdateOwnerManager(int id, [FromBody] ProjectUpdateDto dto, CancellationToken cancellationToken)
+        {
+            int currentUserId = GetUserId();
+            var userProjects = await _service.GetUserProjectsAsync(currentUserId, cancellationToken);
+            
+            if (!userProjects.Any(p => p.Id == id))
+            {
+                return NotFound();
+            }
+
+            var result = await _service.UpdateProjectAsync(id, dto, cancellationToken);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            return Ok(new { id = result });
+        }
+
+        /// <summary>
         /// Delete project by id (admin).
         /// </summary>
         /// <param name="id"></param>
@@ -257,6 +384,32 @@ namespace TaskFlow.Api.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
+            var result = await _service.DeleteProjectAsync(id, cancellationToken);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            return Ok(new { id = result });
+        }
+
+        /// <summary>
+        /// Delete project by id (owner/manager).
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpDelete("my/{id}")]
+        [Authorize(Policy = "Manager")]
+        public async Task<IActionResult> DeleteOwnerManager(int id, CancellationToken cancellationToken)
+        {
+            int currentUserId = GetUserId();
+            var userProjects = await _service.GetUserProjectsAsync(currentUserId, cancellationToken);
+            
+            if (!userProjects.Any(p => p.Id == id))
+            {
+                return NotFound();
+            }
+
             var result = await _service.DeleteProjectAsync(id, cancellationToken);
             if (result == null)
             {
