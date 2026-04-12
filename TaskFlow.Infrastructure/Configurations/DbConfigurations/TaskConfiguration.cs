@@ -16,18 +16,17 @@ namespace TaskFlow.Infrastructure.Configurations.DbConfigurations
         {
             builder.HasKey(x => x.Id);
 
-            builder.HasIndex(x => x.TaskName)
-                .IsUnique();
-
             builder.Property(x => x.CreatedAt)
                 .HasDefaultValueSql("SYSDATETIME()");
 
             builder.Property(x => x.Status)
                 .HasDefaultValue(TaskFlow.Domain.Enums.TaskEnums.TaskStatus.Waiting);
 
-            builder.HasOne(t => t.User).WithMany(u => u.Tasks).HasForeignKey(t => t.UserId);
+            builder.HasOne(t => t.User).WithMany(u => u.Tasks)
+                .HasForeignKey(t => t.UserId).OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(t => t.Project).WithMany(p => p.Tasks).HasForeignKey(t => t.ProjectId);
+            builder.HasOne(t => t.Project).WithMany(p => p.Tasks)
+                .HasForeignKey(t => t.ProjectId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

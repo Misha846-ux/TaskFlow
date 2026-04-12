@@ -26,15 +26,19 @@ namespace TaskFlow.Infrastructure.Configurations.DbConfigurations
                 .HasDefaultValue(GlobalRole.User);
 
 
-            builder.HasMany(u => u.Companies).WithOne(c => c.User).HasForeignKey(c => c.UserId);
+            builder.HasMany(u => u.Companies).WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(u => u.Tasks).WithOne(t => t.User).HasForeignKey(t => t.UserId);
+            builder.HasMany(u => u.Tasks).WithOne(t => t.User)
+                .HasForeignKey(t => t.UserId).OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(u => u.Projects).WithMany(p => p.Users);
 
-            builder.HasMany(u => u.RefreshTokens).WithOne(r => r.User).HasForeignKey(r => r.UserId);
+            builder.HasMany(u => u.RefreshTokens).WithOne(r => r.User)
+                .HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(u => u.Changes).WithOne(c => c.User).HasForeignKey(c => c.UserId);
+            builder.HasMany(u => u.Changes).WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

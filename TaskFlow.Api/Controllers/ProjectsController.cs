@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.DTOs.ProjectDTOs;
+using TaskFlow.Application.Exceptions;
 using TaskFlow.Application.Interfaces.Services;
 
 namespace TaskFlow.Api.Controllers
@@ -32,7 +33,7 @@ namespace TaskFlow.Api.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
             {
-                throw new UnauthorizedAccessException("User ID not found.");
+                throw new UnauthorizedException("User ID not found.");
             }
             return userId;
         }

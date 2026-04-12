@@ -17,6 +17,11 @@ namespace TaskFlow.Domain.Entities
         public int? NoteId { get; set; }
         [Required]
         public int? UserId { get; set; }
+        [Required]
+        public ChangeType? ChangeType { get; set; }
+        [Required]
+        public DateTime? CreatedAt { get; set; }
+        public string Message { get; set; }
         public UserEntity User { get; set; }
     }
 }

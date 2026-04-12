@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,6 +53,7 @@ namespace TaskFlow.Api
             builder.Services.AddScoped<ITaskRepository, TaskRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            builder.Services.AddScoped<IChangeRepository, ChangeRepository>();
 
             //==================Services============================
             builder.Services.AddScoped<ICachingService, RedisCachingService>();
@@ -62,6 +62,7 @@ namespace TaskFlow.Api
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ICompanyService, CompanyService>();
             builder.Services.AddScoped<IJwtService, JwtService>();
+            builder.Services.AddScoped<IChangeService, ChangeService>();
 
             //==================Helpers============================
             builder.Services.AddScoped<IHashHelper, HashHelper>();
