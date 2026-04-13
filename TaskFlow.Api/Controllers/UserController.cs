@@ -72,6 +72,12 @@ namespace TaskFlow.Api.Controllers
             UserGetDto user = await _userService.GetUserByEmailAsync(email, cancellationToken);
             return Ok(user);
         }
+        [HttpGet("Get/Avatar{id}")]
+        public async Task<IActionResult> GetAvatar([FromRoute] int id, CancellationToken cancellationToken)
+        {
+            var img = await _userService.GetUserAvatar(id, cancellationToken);
+            return img;
+        }
 
 
 
@@ -139,7 +145,8 @@ namespace TaskFlow.Api.Controllers
         public async Task<IActionResult> UpdateUserAvatar([FromBody]IFormFile file, CancellationToken cancellationToken)
         {
             int userid = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            throw new Exception("Method not finished");
+            await _userService.UpdateUserAvatar(userid, file, cancellationToken);
+            return Ok();
         }
     }
 }

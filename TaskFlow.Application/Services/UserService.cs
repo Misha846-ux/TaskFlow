@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.DTOs.TaskDTOs;
 using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Application.Interfaces.Helpers;
@@ -144,6 +145,30 @@ namespace TaskFlow.Application.Services
             catch (Exception ex)
             {
                 throw new Exception("User Service: Problem with GetAllUsersAsync");
+            }
+        }
+
+        public async Task<FileStreamResult> GetUserAvatar(int userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                UserEntity user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
+                if (user == null)
+                {
+                    throw new UnauthorizedAccessException();
+                }
+                using(FileStream stream = new FileStream(user.PassToIcon, FileMode.Open, FileAccess.Read))
+                {
+                    return new FileStreamResult(stream, "image/png");
+                }
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("User Sevice: UpdateUserAvatar operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User Service: Problem with UpdateUserAvatar");
             }
         }
 
@@ -396,7 +421,7 @@ namespace TaskFlow.Application.Services
                 {
                     throw new UnauthorizedAccessException();
                 }
-                string fileName = $":{user.Id}:{user.UserName}";
+                string fileName = $":{user.Id}:{user.UserName}{Path.GetExtension(file.FileName)}";
                 string path = Path.Combine("wwwroot", fileName);
                 using (FileStream stream = new FileStream(path, FileMode.Create))
                 {
