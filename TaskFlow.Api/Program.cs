@@ -27,6 +27,16 @@ namespace TaskFlow.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
             //===============================ReadConfigurations===================================
             var jwtSettings = builder.Configuration
             .GetSection("Jwt")
@@ -77,7 +87,11 @@ namespace TaskFlow.Api
                 var config = builder.Configuration.GetConnectionString("Redis");
                 return ConnectionMultiplexer.Connect(config);
             });
-
+            //=================================Cookie===================================================
+            builder.Services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
             //==========================AddAuthorization================================================
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -147,18 +161,10 @@ namespace TaskFlow.Api
 
             builder.Services.AddAuthorization();
             //====================React=============================
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowReact",
-                    policy => policy
-                        .WithOrigins("http://localhost:5173")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials());
-            });
+            
             var app = builder.Build();
 
-            app.UseCors("AllowReact");
+            app.UseCors("AllowFrontend");
             // ================= Middleware =================
             if (app.Environment.IsDevelopment())
             {
@@ -168,6 +174,7 @@ namespace TaskFlow.Api
 
             app.UseExceptionHandler();
             app.UseHttpsRedirection();
+            app.UseCookiePolicy();
             app.UseAuthentication();
             app.UseAuthorization();
 

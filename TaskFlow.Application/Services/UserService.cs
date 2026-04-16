@@ -35,7 +35,6 @@ namespace TaskFlow.Application.Services
             _hashHelper = hashHelper;
             _mapper = mapper;
             _tokenService = tokenService;
-            //_refreshTokenRepository = refreshTokenRepository;
             _cacheService = cacheService;
             _companyRepository = companyRepository;
 
