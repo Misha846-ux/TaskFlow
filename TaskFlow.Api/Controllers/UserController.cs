@@ -8,7 +8,7 @@ using TaskFlow.Domain.Enums;
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [Authorize]
     public class UserController(IUserService _userService) : ControllerBase
     {

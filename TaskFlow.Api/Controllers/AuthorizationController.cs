@@ -10,7 +10,7 @@ using TaskFlow.Infrastructure.Services;
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AuthorizationController(IUserService _userService, ICompanyService _companyService): ControllerBase
     {
         [HttpPost("SingUp")]
@@ -26,11 +26,12 @@ namespace TaskFlow.Api.Controllers
             RefreshTokenEntity token = await _userService.LoginWithPasswordAsync(user, cancellationToken);
             Response.Cookies.Append("refreshToken", token.Token, new CookieOptions
             {
-                HttpOnly = true,       
+                HttpOnly = true,
                 Secure = true,        
-                SameSite = SameSiteMode.Strict, 
+                SameSite = SameSiteMode.None, 
                 Expires = token.Expires
             });
+
             return Ok();
         }
         /// <summary>
@@ -74,7 +75,7 @@ namespace TaskFlow.Api.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = token.Expires
             });
             return Ok();
