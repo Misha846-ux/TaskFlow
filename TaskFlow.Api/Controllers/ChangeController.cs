@@ -11,7 +11,7 @@ using TaskFlow.Application.Interfaces.Services;
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
-    [Route("api/changes")]
+    [Route("api/[controller]")]
     [Authorize]
     public class ChangeController : ControllerBase
     {

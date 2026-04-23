@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Application.DTOs.UserDTOs;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Application.Mapping;
 
@@ -33,7 +34,8 @@ public class UserProfile : Profile
 
         CreateMap<UserUpdateDto, UserEntity>()
             .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
-            .ForMember(dest => dest.GlobalRole, opt => opt.MapFrom(src => src.GlobaleRole.ToString()))
+            .ForMember(dest => dest.GlobalRole, opt => opt
+            .MapFrom(src => string.IsNullOrEmpty(src.GlobaleRole) ? (GlobalRole?)null : Enum.Parse<GlobalRole>(src.GlobaleRole)))
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.RecoveryTokenHash, opt => opt.Ignore())
             .ForMember(dest => dest.RecoveryTokenLifeTime, opt => opt.Ignore())

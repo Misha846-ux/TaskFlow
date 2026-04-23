@@ -1,19 +1,20 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.DTOs.ProjectDTOs;
 using TaskFlow.Application.Exceptions;
 using TaskFlow.Application.Interfaces.Services;
+using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
-    [Route("api/projects")]
+    [Route("api/[controller]")]
     [Authorize]
     public class ProjectsController : ControllerBase
     {
@@ -46,6 +47,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
         public async Task<IActionResult> Create([FromBody] ProjectPostDto dto, CancellationToken cancellationToken)
         {
             int userId = GetUserId();
@@ -122,13 +124,13 @@ namespace TaskFlow.Api.Controllers
         }
 
         /// <summary>
-        /// Get project by id (Owner/Manager).
+        /// Get project by id.
         /// </summary>
         /// <param name="id"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("my/{id}")]
-        [Authorize(Policy = "Manager")]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         public async Task<IActionResult> GetMyById(int id, CancellationToken cancellationToken)
         {
             int userId = GetUserId();
@@ -146,13 +148,13 @@ namespace TaskFlow.Api.Controllers
         }
 
         /// <summary>
-        /// Get project by name (Owner/Manager).
+        /// Get project by name
         /// </summary>
         /// <param name="name"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("my/by-name/{name}")]
-        [Authorize(Policy = "Manager")]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         public async Task<IActionResult> GetMyByName(string name, CancellationToken cancellationToken)
         {
             int userId = GetUserId();
@@ -202,6 +204,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("my-projects")]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         public async Task<IActionResult> GetUserProjects(CancellationToken cancellationToken)
         {
             int userId = GetUserId();
@@ -217,6 +220,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("my-projects/filtered")]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         public async Task<IActionResult> GetUserProjectsPagination([FromQuery] int count, [FromQuery] int side, CancellationToken cancellationToken)
         {
             int userId = GetUserId();
@@ -231,6 +235,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("{projectId}/users")]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         public async Task<IActionResult> GetProjectUsers(int projectId, CancellationToken cancellationToken)
         {
             var users = await _service.GetProjectUsersAsync(projectId, cancellationToken);
@@ -264,7 +269,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("my/{projectId}/users/{userId}")]
-        [Authorize(Policy = "Manager")]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
         public async Task<IActionResult> AddUserToProjectOwnerManager(int projectId, int userId, CancellationToken cancellationToken)
         {
             int currentUserId = GetUserId();
@@ -309,7 +314,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpDelete("my/{projectId}/users/{userId}")]
-        [Authorize(Policy = "Manager")]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
         public async Task<IActionResult> RemoveUserFromProjectOwnerManager(int projectId, int userId, CancellationToken cancellationToken)
         {
             int currentUserId = GetUserId();
@@ -355,7 +360,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPut("my/{id}")]
-        [Authorize(Policy = "Manager")]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
         public async Task<IActionResult> UpdateOwnerManager(int id, [FromBody] ProjectUpdateDto dto, CancellationToken cancellationToken)
         {
             int currentUserId = GetUserId();
@@ -399,7 +404,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpDelete("my/{id}")]
-        [Authorize(Policy = "Manager")]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
         public async Task<IActionResult> DeleteOwnerManager(int id, CancellationToken cancellationToken)
         {
             int currentUserId = GetUserId();

@@ -1,9 +1,10 @@
-﻿using System.Security.Claims;
-using System.Threading;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Threading;
 using TaskFlow.Application.DTOs.ComapniesDTOs;
 using TaskFlow.Application.Interfaces.Services;
+using TaskFlow.Domain.Enums;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace TaskFlow.Api.Controllers
@@ -220,6 +221,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="id">id компании которая будет удалена</param>
         /// <returns></returns>
         [HttpDelete("Delete{id}")]
+        [Authorize(Policy = nameof(CompanyRole.Owner))]
         public async Task<IActionResult> DeleteCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
             try
@@ -268,6 +270,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="copmany"></param>
         /// <returns></returns>
         [HttpPut("Update")]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
         public async Task<IActionResult> Update([FromBody] CompanyOfUserUpdateDto company, CancellationToken cancellationToken)
         {
             try

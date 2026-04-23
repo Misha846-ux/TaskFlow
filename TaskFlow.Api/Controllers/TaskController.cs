@@ -12,6 +12,7 @@ namespace TaskFlow.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TaskController(ITaskService _taskService):ControllerBase
     {
         //======================================================================GET==============================================================================
@@ -38,7 +39,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="count">Amount of tasks in one datas portion</param>
         /// <param name="side">Number of data's portion</param>
         /// <returns></returns>
-        [Authorize]
+        [Authorize(Roles = nameof(GlobalRole.Admin))]
         [HttpGet("Filtred")]
         public async Task<IActionResult> GetPagination([FromQuery] int count, int side, CancellationToken cancellationToken)
         {
@@ -52,7 +53,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="count">Amount of tasks in one datas portion</param>
         /// <param name="side">Number of data's portion</param>
         /// <returns></returns>
-        [Authorize]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         [HttpGet("FiltredWithProjectId")]
         public async Task<IActionResult> GetExtraPagination(int projectId,[FromQuery] int count, int side, CancellationToken cancellationToken)
         {
@@ -67,6 +68,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="name">Letter's reader which has to be in name</param>
         /// <returns></returns>
         [HttpGet("Filtred/SearchByName")]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         public async Task<IActionResult> GetByNamePagination([FromQuery] int count, int side, string name, int projectId, CancellationToken cancellationToken)
         {
             ICollection<TaskGetDto> tasks = await _taskService.GetTasksByNamePaginationAsync(name, projectId,count, side, cancellationToken);
@@ -92,7 +94,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="pagenum"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        [Authorize]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         [HttpGet("GetByName/{name}")]
         public async Task<IActionResult> GetTaskByName(CancellationToken cancellationToken, [FromRoute] string name, [FromQuery] int projectId)
         {
@@ -105,14 +107,14 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="date"></param>
         /// <returns></returns>
-        [Authorize]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         [HttpGet("GetByDate/{date}")]
         public async Task<IActionResult> GetTaskByDeadLine([FromQuery] int projectId, [FromRoute] DateTime date, CancellationToken cancellationToken)
         {
             var task = await _taskService.GetTaskByDeadLineAsync(date, projectId, cancellationToken); 
             return Ok(task);
         }
-        [Authorize]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         [HttpGet("GetByStatus/{status}")]
         public async Task<IActionResult> GetTaskByStatus([FromRoute] TaskFlow.Domain.Enums.TaskEnums.TaskStatus status, [FromQuery] int projectId, CancellationToken cancellationToken)
         {
@@ -156,7 +158,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
-        [Authorize]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
         [HttpPost("AddTask")]
         public async Task<IActionResult> AddTask([FromBody] TaskPostDto dto, CancellationToken cancellationToken)
         {
@@ -197,7 +199,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="id"></param>
         /// <param name="dto"></param>
         /// <returns></returns>
-        [Authorize(Roles = nameof(GlobalRole.User))]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
         [HttpPut("user/UpdateById/{id}")]
         public async Task<IActionResult> UpdateUserTask(int id, TaskUpdateDto dto, CancellationToken cancellationToken)
         {
@@ -233,7 +235,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [Authorize(Roles = nameof(GlobalRole.User))]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
         [HttpDelete("user/DeleteById/{id}")]
         public async Task<IActionResult> DeleteUserTaskById(int id, CancellationToken cancellationToken)
         {
