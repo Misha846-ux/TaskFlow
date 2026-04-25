@@ -50,6 +50,15 @@ namespace TaskFlow.Infrastructure.Repositories
                     .Include(c => c.Users)
                     .Where(c => c.Users.Any(u => u.UserId == user.Id && u.CompanyRole == Domain.Enums.CompanyRole.Owner))
                     .ToListAsync(cancellationToken);
+
+                if (!string.IsNullOrEmpty(user.PassToIcon))
+                {
+                    if (System.IO.File.Exists(user.PassToIcon))
+                    {
+                        System.IO.File.Delete(user.PassToIcon);
+                    }
+                }
+
                 foreach (CompanyEntity company in companies)
                 {
                     _context.Companies.Remove(company);

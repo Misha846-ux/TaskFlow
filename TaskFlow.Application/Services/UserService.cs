@@ -147,29 +147,29 @@ namespace TaskFlow.Application.Services
             }
         }
 
-        public async Task<FileStreamResult> GetUserAvatar(int userId, CancellationToken cancellationToken)
-        {
-            try
-            {
-                UserEntity user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
-                if (user == null)
-                {
-                    throw new UnauthorizedAccessException();
-                }
-                using(FileStream stream = new FileStream(user.PassToIcon, FileMode.Open, FileAccess.Read))
-                {
-                    return new FileStreamResult(stream, "image/png");
-                }
-            }
-            catch (OperationCanceledException oex)
-            {
-                throw new Exception("User Sevice: UpdateUserAvatar operation were canceled");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("User Service: Problem with UpdateUserAvatar");
-            }
-        }
+        //public async Task<FileStreamResult> GetUserAvatar(int userId, CancellationToken cancellationToken)
+        //{
+        //    try
+        //    {
+        //        UserEntity user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
+        //        if (user == null)
+        //        {
+        //            throw new UnauthorizedAccessException();
+        //        }
+        //        using(FileStream stream = new FileStream(user.PassToIcon, FileMode.Open, FileAccess.Read))
+        //        {
+        //            return new FileStreamResult(stream, "image/png");
+        //        }
+        //    }
+        //    catch (OperationCanceledException oex)
+        //    {
+        //        throw new Exception("User Sevice: UpdateUserAvatar operation were canceled");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception("User Service: Problem with UpdateUserAvatar");
+        //    }
+        //}
 
         public async Task<UserGetDto> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
         {
@@ -420,7 +420,7 @@ namespace TaskFlow.Application.Services
                 {
                     throw new UnauthorizedAccessException();
                 }
-                string fileName = $":{user.Id}:{user.UserName}{Path.GetExtension(file.FileName)}";
+                string fileName = $"_{user.Id}_{user.UserName}{Path.GetExtension(file.FileName)}";
                 string path = Path.Combine("wwwroot", fileName);
                 using (FileStream stream = new FileStream(path, FileMode.Create))
                 {

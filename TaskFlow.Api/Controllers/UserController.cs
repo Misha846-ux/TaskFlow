@@ -75,10 +75,22 @@ namespace TaskFlow.Api.Controllers
         [HttpGet("Get/Avatar{id}")]
         public async Task<IActionResult> GetAvatar([FromRoute] int id, CancellationToken cancellationToken)
         {
-            var img = await _userService.GetUserAvatar(id, cancellationToken);
-            return img;
-        }
+            var user = await _userService.GetUserByIdAsync(id, cancellationToken);
 
+            if (user == null)
+                return Unauthorized();
+
+            var bytes = await System.IO.File.ReadAllBytesAsync(user.PassToIcon, cancellationToken);
+
+            return new FileContentResult(bytes, "image/png");
+        }
+        [HttpGet("Get/Myself")]
+        public async Task<IActionResult> GetMe(CancellationToken cancellationToken)
+        {
+            int id = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            UserGetDto user = await _userService.GetUserByIdAsync(id, cancellationToken);
+            return Ok(user);
+        }
 
 
         //============================================Delete===============================================
@@ -141,11 +153,12 @@ namespace TaskFlow.Api.Controllers
             return Ok(user);
         }
 
-        [HttpPut("Update/UserAvatar{id}")]
-        public async Task<IActionResult> UpdateUserAvatar([FromBody]IFormFile file, CancellationToken cancellationToken)
+        [HttpPut("Update/UserAvatar")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateUserAvatar([FromForm] AvatarPutDto avatar, CancellationToken cancellationToken)
         {
             int userid = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            await _userService.UpdateUserAvatar(userid, file, cancellationToken);
+            await _userService.UpdateUserAvatar(userid, avatar.UserAvata, cancellationToken);
             return Ok();
         }
     }

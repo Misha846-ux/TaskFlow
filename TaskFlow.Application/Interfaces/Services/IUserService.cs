@@ -54,6 +54,6 @@ namespace TaskFlow.Application.Interfaces.Services
 
         Task UpdateUserAvatar(int userId, IFormFile file, CancellationToken cancellationToken);
         
-        Task<FileStreamResult> GetUserAvatar(int userId, CancellationToken cancellationToken);
+        //Task<FileStreamResult> GetUserAvatar(int userId, CancellationToken cancellationToken);
     }
 }
