@@ -1,11 +1,13 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
-using System.Text;
+using TaskFlow.Api.AuthHandlers;
 using TaskFlow.Api.ExceptionHandlers;
 using TaskFlow.Application.AuthorizationRequirements;
 using TaskFlow.Application.Interfaces.Helpers;
@@ -79,6 +81,7 @@ namespace TaskFlow.Api
 
             //================== Exception Handler ============================
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, CompanyRolesHandler>();
             builder.Services.AddProblemDetails();
 
             //==================Redis============================
@@ -158,8 +161,6 @@ namespace TaskFlow.Api
                         new[] { CompanyRole.Owner, CompanyRole.Manager }
                         )));
             });
-
-            builder.Services.AddAuthorization();
             //====================React=============================
             
             var app = builder.Build();

@@ -123,8 +123,8 @@ namespace TaskFlow.Infrastructure.Repositories
             try
             {
                 return await _context.CompanyUsers
-                    .Include(e => e.Company)
-                    .Include(e => e.User)
+                    //.Include(e => e.Company)
+                    //.Include(e => e.User)
                     .Where(c => c.CompanyId == companyId)
                     .ToListAsync(cancellationToken);
             }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Application.DTOs.ComapniesDTOs;
+using TaskFlow.Domain.Entities;
 
 namespace TaskFlow.Application.Interfaces.Services;
 
@@ -70,4 +71,5 @@ public interface ICompanyService
     /// Обновляет данные компании (только для пользователей, имеющих право в этой компании).
     /// </summary>
     Task UpdateUsersCompanyByIdAsync(CompanyOfUserUpdateDto companyDto, CancellationToken cancellationToken);
+    Task<ICollection<CompanyUserGetDto>> GetCompanyUsersAsync(int companyId, CancellationToken cancellationToken);
 }

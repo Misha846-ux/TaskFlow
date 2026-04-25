@@ -157,6 +157,12 @@ namespace TaskFlow.Api.Controllers
                 return BadRequest("An error occurred while getting the company.");
             }
         }
+        [HttpGet("Get/Users/{companyId}")]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
+        public async Task<IActionResult> GetCompanyUsers([FromRoute] int companyId, CancellationToken cancellationToken)
+        {
+            return Ok(await _companyService.GetCompanyUsersAsync(companyId, cancellationToken));
+        }
 
         //===========================================Post============================================
 

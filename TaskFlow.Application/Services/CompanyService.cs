@@ -231,5 +231,19 @@ public class CompanyService : ICompanyService
             _logger.LogWarning("An error occurred in CompanyService while updating the user's company");
         }
     }
+
+    public async Task<ICollection<CompanyUserGetDto>> GetCompanyUsersAsync(int companyId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var users = await _companyRepository.GetAllCompanyEmploersAsync(companyId, cancellationToken);
+            return _mapper.Map<ICollection<CompanyUserGetDto>>(users);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("An error occurred in CompanyService while GetCompanyUsers");
+            return null;
+        }
+    }
 }
 
