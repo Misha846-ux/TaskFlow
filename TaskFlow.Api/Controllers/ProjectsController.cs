@@ -175,7 +175,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("by-company/{companyId}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         public async Task<IActionResult> GetByCompanyId(int companyId, CancellationToken cancellationToken)
         {
             var projects = await _service.GetProjectsByCompanyIdAsync(companyId, cancellationToken);
@@ -191,7 +191,7 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("by-company/{companyId}/filtered")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
         public async Task<IActionResult> GetByCompanyIdPagination(int companyId, [FromQuery] int count, [FromQuery] int side, CancellationToken cancellationToken)
         {
             var projects = await _service.GetProjectsByCompanyIdPaginationAsync(companyId, count, side, cancellationToken);
