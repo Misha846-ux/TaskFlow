@@ -160,6 +160,10 @@ namespace TaskFlow.Api
                     policy.Requirements.Add(new CompanyRequirementRoles(
                         new[] { CompanyRole.Owner, CompanyRole.Manager }
                         )));
+                options.AddPolicy(nameof(CompanyRole.Employee), policy =>
+                    policy.Requirements.Add(new CompanyRequirementRoles(
+                        new[] { CompanyRole.Employee, CompanyRole.Owner, CompanyRole.Manager }
+                        )));
             });
             //====================React=============================
             

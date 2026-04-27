@@ -291,5 +291,21 @@ namespace TaskFlow.Api.Controllers
                 return null;
             }
         }
+        [HttpPut("UpdateCompany")]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
+        public async Task<IActionResult> UpdateCompany([FromBody] CompanyUpdateDto company, CancellationToken cancellationToken)
+        {
+            try
+            {
+                company.Id = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                await _companyService.UpdateCompanyByIdAsync(company, cancellationToken);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while updating the company: {ex.Message}");
+                return null;
+            }
+        }
     }
 }
