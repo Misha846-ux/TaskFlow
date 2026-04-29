@@ -52,27 +52,27 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="name">Буквосочетание которое должно присутствовать в имени</param>
         /// <returns></returns>
-        [HttpGet("SearchByName{name}")]
+        [HttpGet("SearchByName/{name}")]
         public async Task<IActionResult> GetByName([FromRoute] string name, CancellationToken cancellationToken)
         {
             ICollection<UserGetDto> users = await _userService.GetUsersByNameAsync(name, cancellationToken);
             return Ok(users);
         }
 
-        [HttpGet("ById{id}")]
+        [HttpGet("ById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken cancellationToken)
         {
             UserGetDto user = await _userService.GetUserByIdAsync(id, cancellationToken);
             return Ok(user);
         }
 
-        [HttpGet("ByEmail{rout}")]
+        [HttpGet("ByEmail/{email}")]
         public async Task<IActionResult> GetByEmail([FromRoute] string email, CancellationToken cancellationToken)
         {
             UserGetDto user = await _userService.GetUserByEmailAsync(email, cancellationToken);
             return Ok(user);
         }
-        [HttpGet("Get/Avatar{id}")]
+        [HttpGet("Get/Avatar/{id}")]
         public async Task<IActionResult> GetAvatar([FromRoute] int id, CancellationToken cancellationToken)
         {
             var user = await _userService.GetUserByIdAsync(id, cancellationToken);

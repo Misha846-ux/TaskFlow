@@ -36,7 +36,8 @@ public class CompanyProfile : Profile
 
         CreateMap<CompanyOfUserUpdateDto, CompanyUserEntity>()
             .ForMember(dest => dest.Company, opt => opt.Ignore())
-            .ForMember(dest => dest.User, opt => opt.Ignore());
+            .ForMember(dest => dest.User, opt => opt.Ignore())
+            .ForMember(dest => dest.Id, opt => opt.Ignore());
 
         CreateMap<CompanyUserEntity, CompanyUserGetDto>()
             .ForMember(dest => dest.CompanyRole, opt => opt.MapFrom(src => src.CompanyRole.ToString()));

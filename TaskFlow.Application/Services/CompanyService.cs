@@ -224,7 +224,7 @@ public class CompanyService : ICompanyService
         {
             await _cachingService.RemoveAsync("Companies");
             var company = _mapper.Map<CompanyUserEntity>(companyDto);
-            await _companyRepository.UpdateCompanyUserAsync(company, cancellationToken);
+            await _companyRepository.AddEmployeeToCompanyAsync(company, cancellationToken);
         }
         catch (Exception ex)
         {
