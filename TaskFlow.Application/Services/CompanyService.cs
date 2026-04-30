@@ -149,27 +149,18 @@ public class CompanyService : ICompanyService
         }
     }
 
-    public async Task<int?> DeleteUsersCompanyByIdAsync(int id, int userId, CancellationToken cancellationToken)
+    public async Task<int?> DeleteUsersCompanyByIdAsync(int id, CancellationToken cancellationToken)
     {
         try
         {
-            var company = await _companyRepository.GetCompanyByIdAsync(id, cancellationToken);
-            if (company == null) return null;
+            CompanyUserEntity user = await _companyRepository.GetCompanyUserByIdAsync(id, cancellationToken);
+            if (user == null) return null;
+            if (user.CompanyRole == CompanyRole.Owner) return null;
+            
+            await _cachingService.RemoveAsync("Companies");
 
-            if (company.Users.Any(u =>u.UserId == userId && u.CompanyRole.ToString() == "Owner"))
-            {
 
-                
-                await _cachingService.RemoveAsync("Companies");
-                
-
-                return await _companyRepository.DeleteCompanyByIdAsync(id, cancellationToken);
-            }
-            else
-            {
-                Console.WriteLine($"User with id: {userId} can not delete the company with id: {id}");
-                return null;
-            }
+            return await _companyRepository.DeleteEmployeeByIdAsync(id, cancellationToken);
         }
         catch (Exception ex)
         {

@@ -234,7 +234,24 @@ namespace TaskFlow.Api.Controllers
             {
                 int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-                await _companyService.DeleteUsersCompanyByIdAsync(id, userId, cancellationToken);
+                await _companyService.DeleteCompanyByIdAsync(id, cancellationToken);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred in CompanyController while deleting user's company: {ex.Message}");
+                return BadRequest("An error occurred while deliting the company.");
+            }
+        }
+        [HttpDelete("Delete/User/{id}")]
+        [Authorize(Policy = nameof(CompanyRole.Manager))]
+        public async Task<IActionResult> DeleteCompanyUserById([FromRoute] int id, CancellationToken cancellationToken)
+        {
+            try
+            {
+
+                await _companyService.DeleteUsersCompanyByIdAsync(id, cancellationToken);
 
                 return Ok();
             }
@@ -292,7 +309,7 @@ namespace TaskFlow.Api.Controllers
             }
         }
         [HttpPut("UpdateCompany")]
-        [Authorize(Policy = nameof(CompanyRole.Manager))]
+        [Authorize(Policy = nameof(CompanyRole.Owner))]
         public async Task<IActionResult> UpdateCompany([FromBody] CompanyUpdateDto company, CancellationToken cancellationToken)
         {
             try

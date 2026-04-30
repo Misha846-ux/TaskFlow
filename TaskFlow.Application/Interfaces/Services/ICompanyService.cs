@@ -53,14 +53,14 @@ public interface ICompanyService
     Task<int?> CreateCompanyAsync(CompanyPostDto dto, int ownerUserId, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Удаляет компанию по Id (для Admin — без проверки прав).
+    /// Удаляет компанию по Id.
     /// </summary>
     Task<int?> DeleteCompanyByIdAsync(int id, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Удаляет компанию по Id (только если пользователь — владелец/имеет право).
+    /// Удаляет пользователя из компании
     /// </summary>
-    Task<int?> DeleteUsersCompanyByIdAsync(int id, int userId, CancellationToken cancellationToken);
+    Task<int?> DeleteUsersCompanyByIdAsync(int id, CancellationToken cancellationToken);
 
     /// <summary>
     /// Обновляет данные компании (для Admin — без проверки прав).
