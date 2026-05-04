@@ -281,7 +281,6 @@ namespace TaskFlow.Api.Controllers
         {
             try
             {
-                company.Id = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 await _companyService.UpdateUsersCompanyByIdAsync(company, cancellationToken);
                 return Ok();
             }
@@ -291,20 +290,24 @@ namespace TaskFlow.Api.Controllers
                 return null;
             }
         }
+
         [HttpPut("UpdateCompany")]
         [Authorize(Policy = nameof(CompanyRole.Manager))]
         public async Task<IActionResult> UpdateCompany([FromBody] CompanyUpdateDto company, CancellationToken cancellationToken)
         {
             try
             {
-                company.Id = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                await _companyService.UpdateCompanyByIdAsync(company, cancellationToken);
+                var result = await _companyService.UpdateCompanyByIdAsync(company, cancellationToken);
+                if (result == null)
+                {
+                    return BadRequest("Failed to update company");
+                }
                 return Ok();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred in CompanyController while updating the company: {ex.Message}");
-                return null;
+                return StatusCode(500, "Internal server error");
             }
         }
     }

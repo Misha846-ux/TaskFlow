@@ -274,20 +274,24 @@ namespace TaskFlow.Infrastructure.Repositories
                 CompanyEntity company = await GetCompanyByIdAsync(newCompany.Id, cancellationToken);
                 if (company == null)
                 {
-                    throw new Exception();
+                    throw new Exception("Company not found");
                 }
 
-                PropertyInfo[] companyProperties = typeof(CompanyEntity).GetType().GetProperties();
-                foreach(var prop in companyProperties)
+                PropertyInfo[] companyProperties = typeof(CompanyEntity).GetProperties();
+                foreach (var prop in companyProperties)
                 {
-                    if(prop.GetValue(newCompany) != null)
+                    if (prop.Name == "Id" || prop.Name == "CreatedAt")
                     {
-                        prop.SetValue(company, newCompany);
+                        continue;
+                    }
+                    var value = prop.GetValue(newCompany);
+                    if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                    {
+                        prop.SetValue(company, value);
                     }
                 }
 
                 await _context.SaveChangesAsync(cancellationToken);
-
                 return company;
             }
             catch (OperationCanceledException oex)
@@ -296,7 +300,7 @@ namespace TaskFlow.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception("Company Repository: Problem with UpdateCompanyAsync");
+                throw new Exception($"Company Repository: Problem with UpdateCompanyAsync - {ex.Message}");
             }
         }
 
