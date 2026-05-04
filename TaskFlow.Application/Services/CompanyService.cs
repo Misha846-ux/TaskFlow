@@ -197,18 +197,30 @@ public class CompanyService : ICompanyService
         try
         {
             await _cachingService.RemoveAsync("Companies");
-            var company = _mapper.Map<CompanyEntity>(dto);
-            await _companyRepository.UpdateCompanyAsync(company, cancellationToken);
-            return company.Id;
+            var existingCompany = await _companyRepository.GetCompanyByIdAsync(dto.Id, cancellationToken);
+            if (existingCompany == null)
+            {
+                _logger.LogWarning("Company with id {CompanyId} not found", dto.Id);
+                return null;
+            }
+            if (dto.Name != null)
+            {
+                existingCompany.Name = dto.Name;
+            }
+            if (dto.Description != null)
+            {
+                existingCompany.Description = dto.Description;
+            }
+            await _companyRepository.UpdateCompanyAsync(existingCompany, cancellationToken);
+            return existingCompany.Id;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            _logger.LogWarning("An error occurred while updating the company");
+            _logger.LogError(ex, "An error occurred while updating the company");
             return null;
         }
     }
 
-    //Maybe still required to redo this method starting from the reppsitory and entities
     public async Task UpdateUsersCompanyByIdAsync(CompanyOfUserUpdateDto companyDto, CancellationToken cancellationToken)
     {
         try
