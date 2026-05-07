@@ -119,7 +119,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("ById{id}")]
+        [HttpGet("ById/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
@@ -140,7 +140,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("MyCompanyById{id}")]
+        [HttpGet("MyCompanyById/{id}")]
         public async Task<IActionResult> GetMyCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
             try
@@ -205,7 +205,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id">id компании которая будет удалена</param>
         /// <returns></returns>
-        [HttpDelete("DeleteForAdmin{id}")]
+        [HttpDelete("DeleteForAdmin/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCompanyByIdForAdmin([FromRoute] int id, CancellationToken cancellationToken)
         {
@@ -226,7 +226,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id">id компании которая будет удалена</param>
         /// <returns></returns>
-        [HttpDelete("Delete{id}")]
+        [HttpDelete("Delete/{id}")]
         [Authorize(Policy = nameof(CompanyRole.Owner))]
         public async Task<IActionResult> DeleteCompanyById([FromRoute] int id, CancellationToken cancellationToken)
         {
@@ -292,9 +292,9 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="copmany"></param>
         /// <returns></returns>
-        [HttpPut("Update")]
+        [HttpPut("AddUser")]
         [Authorize(Policy = nameof(CompanyRole.Manager))]
-        public async Task<IActionResult> Update([FromBody] CompanyOfUserUpdateDto company, CancellationToken cancellationToken)
+        public async Task<IActionResult> AddUser([FromBody] CompanyOfUserUpdateDto company, CancellationToken cancellationToken)
         {
             try
             {

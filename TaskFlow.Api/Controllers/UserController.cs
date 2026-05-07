@@ -100,7 +100,7 @@ namespace TaskFlow.Api.Controllers
         /// </summary>
         /// <param name="id">id пользователя который будет удалён</param>
         /// <returns></returns>
-        [HttpDelete("DeleteForAdmin{id}")]
+        [HttpDelete("DeleteForAdmin/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteForAdmin([FromRoute] int id, CancellationToken cancellationToken)
         {

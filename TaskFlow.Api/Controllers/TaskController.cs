@@ -25,13 +25,10 @@ namespace TaskFlow.Api.Controllers
         /// <returns></returns>
         [Authorize(Roles = nameof(GlobalRole.Admin))]
         [HttpGet("admin/GetAll")]
-        public async Task<IActionResult> GetAllTasks(CancellationToken cancellationToken, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
+        public async Task<IActionResult> GetAllTasks(CancellationToken cancellationToken)
         {
             var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
-            var chunk = tasks
-            .Skip((pagenum - 1) * limit)
-                .Take(limit);
-            return Ok(chunk);
+            return Ok(tasks);
         }
         /// <summary>
         /// Allow get datas by pagination
@@ -121,35 +118,35 @@ namespace TaskFlow.Api.Controllers
             var task = await _taskService.GetTaskByStatusAsync(status, projectId, cancellationToken);
             return Ok(task);
         }
-        /// <summary>
-        /// Method for getting all Tasks, uses for user
-        /// </summary>
-        /// <param name="pagenum"></param>
-        /// <param name="limit"></param>
-        /// <returns></returns>
-        [Authorize(Roles = nameof(GlobalRole.User))]
-        [HttpGet("user/GetAll")]
-        public async Task<IActionResult> GetAllUserTasks(CancellationToken cancellationToken, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
-        {
-            var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
-            var chunk = tasks
-            .Skip((pagenum - 1) * limit)
-                .Take(limit);
-            return Ok(chunk);
-        }
+        ///// <summary>
+        ///// Method for getting all Tasks, uses for user
+        ///// </summary>
+        ///// <param name="pagenum"></param>
+        ///// <param name="limit"></param>
+        ///// <returns></returns>
+        //[Authorize(Roles = nameof(GlobalRole.User))]
+        //[HttpGet("user/GetAll")]
+        //public async Task<IActionResult> GetAllUserTasks(CancellationToken cancellationToken, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
+        //{
+        //    var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
+        //    var chunk = tasks
+        //    .Skip((pagenum - 1) * limit)
+        //        .Take(limit);
+        //    return Ok(chunk);
+        //}
 
-        /// <summary>
-        /// Method for getting Tasks by id, uses for user
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [Authorize(Roles = nameof(GlobalRole.User))]
-        [HttpGet("user/GetById/{id}")]
-        public async Task<IActionResult> GetUserTaskById([FromRoute] int id, CancellationToken cancellationToken)
-        {
-            var task = await _taskService.GetTaskByIdAsync(id, cancellationToken);
-            return Ok(task);
-        }
+        ///// <summary>
+        ///// Method for getting Tasks by id, uses for user
+        ///// </summary>
+        ///// <param name="id"></param>
+        ///// <returns></returns>
+        //[Authorize(Roles = nameof(GlobalRole.User))]
+        //[HttpGet("user/GetById/{id}")]
+        //public async Task<IActionResult> GetUserTaskById([FromRoute] int id, CancellationToken cancellationToken)
+        //{
+        //    var task = await _taskService.GetTaskByIdAsync(id, cancellationToken);
+        //    return Ok(task);
+        //}
 
         //======================================================================POST=============================================================================
 
