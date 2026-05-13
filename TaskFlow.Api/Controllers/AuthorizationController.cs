@@ -43,11 +43,11 @@ namespace TaskFlow.Api.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("Refresh")]
-        public async Task<IActionResult> RefreshAccessToken(int companyId, CancellationToken cancellationToken)
+        public async Task<IActionResult> RefreshAccessToken([FromBody]int companyId, CancellationToken cancellationToken)
         {
             Request.Cookies.TryGetValue("refreshToken", out string Refreshtoken);
             string accessToken = await _userService.RefreshAsync(Refreshtoken, companyId, cancellationToken);
-            return Ok(accessToken);     
+            return Ok(new { accessToken });     
         }
 
         /// <summary>
