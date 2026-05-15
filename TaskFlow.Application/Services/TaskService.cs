@@ -351,11 +351,28 @@ namespace TaskFlow.Application.Services
             }
             catch (OperationCanceledException oex)
             {
-                throw new Exception("Task Sevice: UpdateTasksByIdAsync operation were canceled");
+                throw new Exception("Task Sevice: GetProjectTasksAsync operation were canceled");
             }
             catch (Exception ex)
             {
-                throw new Exception("Task Service: Problem with UpdateTasksByIdAsync");
+                throw new Exception("Task Service: Problem with GetProjectTasksAsync");
+            }
+        }
+
+        public async Task<ICollection<TaskGetDto>> GetTasksByUserIdAsync(int userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                ICollection<TaskEntity> tasks = await _repository.GetTasksByUserIdAsync(userId, cancellationToken);
+                return _mapper.Map<ICollection<TaskGetDto>>(tasks);
+            }
+            catch (OperationCanceledException oex)
+            {
+                throw new Exception("Task Sevice: GetTasksByUserIdAsync operation were canceled");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Task Service: Problem with GetTasksByUserIdAsync");
             }
         }
     }

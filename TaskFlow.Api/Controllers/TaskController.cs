@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.DTOs.TaskDto;
 using TaskFlow.Application.DTOs.TaskDTOs;
 using TaskFlow.Application.DTOs.UserDTOs;
@@ -125,22 +126,19 @@ namespace TaskFlow.Api.Controllers
             ICollection<TaskGetDto> task = await _taskService.GetProjectTasksAsync(projectId, cancellationToken);
             return Ok(task);
         }
-        ///// <summary>
-        ///// Method for getting all Tasks, uses for user
-        ///// </summary>
-        ///// <param name="pagenum"></param>
-        ///// <param name="limit"></param>
-        ///// <returns></returns>
-        //[Authorize(Roles = nameof(GlobalRole.User))]
-        //[HttpGet("user/GetAll")]
-        //public async Task<IActionResult> GetAllUserTasks(CancellationToken cancellationToken, [FromQuery] int pagenum = 1, [FromQuery] int limit = 10)
-        //{
-        //    var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
-        //    var chunk = tasks
-        //    .Skip((pagenum - 1) * limit)
-        //        .Take(limit);
-        //    return Ok(chunk);
-        //}
+        /// <summary>
+        /// Method for getting all Tasks, uses for user
+        /// </summary>
+        /// <param name="pagenum"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
+        [HttpGet("user/GetAllById/{id}")]
+        public async Task<IActionResult> GetAllUserTasks([FromRoute] int id, CancellationToken cancellationToken)
+        {
+            var tasks = await _taskService.GetTasksByUserIdAsync(id, cancellationToken);
+            return Ok(tasks);
+        }
 
         ///// <summary>
         ///// Method for getting Tasks by id, uses for user
