@@ -407,14 +407,6 @@ namespace TaskFlow.Api.Controllers
         [Authorize(Policy = nameof(CompanyRole.Manager))]
         public async Task<IActionResult> DeleteOwnerManager(int id, CancellationToken cancellationToken)
         {
-            int currentUserId = GetUserId();
-            var userProjects = await _service.GetUserProjectsAsync(currentUserId, cancellationToken);
-            
-            if (!userProjects.Any(p => p.Id == id))
-            {
-                return NotFound();
-            }
-
             var result = await _service.DeleteProjectAsync(id, cancellationToken);
             if (result == null)
             {

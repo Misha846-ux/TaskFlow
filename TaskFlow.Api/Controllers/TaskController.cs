@@ -118,6 +118,13 @@ namespace TaskFlow.Api.Controllers
             var task = await _taskService.GetTaskByStatusAsync(status, projectId, cancellationToken);
             return Ok(task);
         }
+        [Authorize(Policy = nameof(CompanyRole.Employee))]
+        [HttpGet("GetByPojectId/{projectId}")]
+        public async Task<IActionResult> GetTaskByProjectId([FromRoute] int projectId, CancellationToken cancellationToken)
+        {
+            ICollection<TaskGetDto> task = await _taskService.GetProjectTasksAsync(projectId, cancellationToken);
+            return Ok(task);
+        }
         ///// <summary>
         ///// Method for getting all Tasks, uses for user
         ///// </summary>

@@ -24,6 +24,7 @@ namespace TaskFlow.Application.Interfaces.Services
         Task<TaskGetDto?> GetTaskByIdAsync(int id, CancellationToken cancellationToken);
         Task<ICollection<TaskGetDto>> GetTasksPaginationAsync(int count, int side, CancellationToken cancellationToken);
         Task<ICollection<TaskGetDto>> GetProjectTasksPaginationAsync(int projectId, int count, int side, CancellationToken cancellationToken);
+        Task<ICollection<TaskGetDto>> GetProjectTasksAsync(int projectId, CancellationToken cancellationToken);
         Task<ICollection<TaskGetDto>> GetTasksByNamePaginationAsync(string name, int projectId, int count, int side, CancellationToken cancellationToken);
         /// <summary>
         /// Return Task by name or piece of name
