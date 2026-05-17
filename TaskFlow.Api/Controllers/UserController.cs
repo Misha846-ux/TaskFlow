@@ -10,7 +10,7 @@ namespace TaskFlow.Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class UserController(IUserService _userService) : ControllerBase
+    public class UserController(IUserService _userService, IWebHostEnvironment _environment) : ControllerBase
     {
         //========================================Get=============================================
         [HttpGet]
@@ -77,10 +77,17 @@ namespace TaskFlow.Api.Controllers
         {
             var user = await _userService.GetUserByIdAsync(id, cancellationToken);
 
-            if (user == null)
-                return Unauthorized();
-
-            var bytes = await System.IO.File.ReadAllBytesAsync(user.PassToIcon, cancellationToken);
+            string iconName;
+            if(user.PassToIcon != null)
+            {
+                iconName = user.PassToIcon;
+            }
+            else
+            {
+                iconName = "BaseUser.png";
+            }
+            string passToIcon = Path.Combine(_environment.WebRootPath, iconName);
+            var bytes = await System.IO.File.ReadAllBytesAsync(passToIcon, cancellationToken);
 
             return new FileContentResult(bytes, "image/png");
         }
